@@ -16,12 +16,12 @@
       },
       "hf_name": ["martin-alvarez/Fable_datacubes"],
       "hf_split": ["train"],
-      "hf_type": ["snapshot"]
+      "hf_type": ["snapshot"],
+      "hf_link": "https://huggingface.co/datasets/martin-alvarez/Fable_datacubes"
    }
 ],
    "execution_requirements": {
       "needs_gpu": false,
-      "needs_browsing": false,
       "code_language": "python",
       "dependencies": ["numpy", "scipy", "matplotlib", "datasets", "pyfftw"],
       "other_instructions": "Reading GRAFIC files assumes access to standard binary I/O and Fortran-style array handling. No access to RAMSES source code is required. The datasets are quite large, so use your memory wisely."

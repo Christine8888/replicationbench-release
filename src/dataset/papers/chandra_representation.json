@@ -13,11 +13,11 @@
         "data_instructions": {"access_instructions": "All the data is available on Huggingface at https://huggingface.co/datasets/StevenDillmann/chandra_xray_eventfiles. Note that the eventfiles_table.csv already includes preprocessed eventfiles. You can filter for a specific eventfile with the obsreg_id column. The eventfile is then just all rows that are labeled with this obsreg_id ordered by time."},
         "hf_name": ["StevenDillmann/chandra_xray_eventfiles"],
         "hf_split": ["train"],
-        "hf_type": ["snapshot"]
+        "hf_type": ["snapshot"],
+        "hf_link": "https://huggingface.co/datasets/StevenDillmann/chandra_xray_eventfiles"
     },
     "execution_requirements": {
         "needs_gpu": false,
-        "needs_browsing": true,
         "code_language": "python",
         "dependencies": [
         "numpy",
