@@ -13,11 +13,11 @@
     "data_instructions": {"access": "All the data is available on Huggingface at https://huggingface.co/datasets/StevenDillmann/cloudspotting_mars_optimization"},
     "hf_name": ["StevenDillmann/cloudspotting_mars_optimization"],
     "hf_split": ["train"],
-    "hf_type": ["snapshot"]
+    "hf_type": ["snapshot"],
+    "hf_link": "https://huggingface.co/datasets/StevenDillmann/cloudspotting_mars_optimization"
 },
 "execution_requirements": {
     "needs_gpu": false,
-    "needs_browsing": true,
     "code_language": "python",
     "dependencies": [
     "numpy",

@@ -13,11 +13,11 @@
     "data_instructions": {"access": "All the data is available on Huggingface at https://huggingface.co/datasets/StevenDillmann/hubble_trails."},
     "hf_name": ["StevenDillmann/hubble_trails"],
     "hf_split": ["train"],
-    "hf_type": ["snapshot"]
+    "hf_type": ["snapshot"],
+    "hf_link": "https://huggingface.co/datasets/StevenDillmann/hubble_trails"
 },
 "execution_requirements": {
     "needs_gpu": false,
-    "needs_browsing": true,
     "code_language": "python",
     "dependencies": [
     "numpy",

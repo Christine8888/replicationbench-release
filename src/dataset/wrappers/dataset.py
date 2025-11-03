@@ -126,12 +126,14 @@ class HuggingFaceDataset(Dataset):
     hf_name: List[str] = field(default_factory=list)
     hf_split: List[str] = field(default_factory=list)
     hf_type: List[str] = field(default_factory=list)
+    hf_link: List[str] = field(default_factory=list)
 
     def __init__(self, **kwargs):
         # Extract HF-specific fields first
         self.hf_name = kwargs.pop('hf_name', [])
         self.hf_split = kwargs.pop('hf_split', [])
         self.hf_type = kwargs.pop('hf_type', [])
+        self.hf_link = kwargs.pop('hf_link', [])
 
         # Set default split if not provided
         if not self.hf_split and self.hf_name:
@@ -155,4 +157,5 @@ class HuggingFaceDataset(Dataset):
         data['hf_name'] = self.hf_name
         data['hf_split'] = self.hf_split
         data['hf_type'] = self.hf_type
+        data['hf_link'] = self.hf_link
         return data
