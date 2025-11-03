@@ -66,27 +66,22 @@ class Dataloader:
             if self.paper_ids and paper_id not in self.paper_ids:
                 continue
 
-            try:
-                paper = Paper.from_json(str(paper_file))
+            paper = Paper.from_json(str(paper_file))
 
-                # Apply filters - skip papers that don't match ALL criteria
-                if self.filters:
-                    if not all(getattr(paper, key, None) == value for key, value in self.filters.items()):
-                        continue
+            if self.filters:
+                if not all(getattr(paper, key, None) == value for key, value in self.filters.items()):
+                    continue
 
-                paper.tasks = self._load_tasks(paper_id)
+            paper.tasks = self._load_tasks(paper_id)
 
-                if self.load_text:
-                    paper.full_text = load_paper_text(
-                        str(self.manuscripts_dir),
-                        paper_id,
-                        masked=self.masked
-                    )
+            if self.load_text:
+                paper.full_text = load_paper_text(
+                    str(self.manuscripts_dir),
+                    paper_id,
+                    masked=self.masked
+                )
 
-                self.papers[paper_id] = paper
-
-            except Exception as e:
-                print(f"Warning: Failed to load {paper_id}: {e}")
+            self.papers[paper_id] = paper
 
     def _discover_papers(self) -> List[Path]:
         """Find all paper JSON files."""
@@ -153,10 +148,8 @@ class Dataloader:
             for line in f:
                 data = json.loads(line)
 
-                # Parse publication date
                 pub_date = datetime.strptime(data['publication_date'], "%Y-%m-%d")
 
-                # Reconstruct paper
                 paper = Paper(
                     paper_id=data['paper_id'],
                     title=data['title'],
@@ -174,7 +167,6 @@ class Dataloader:
                     tasks={}
                 )
 
-                # Reconstruct tasks
                 if 'tasks' in data:
                     for task_id, task_data in data['tasks'].items():
                         instructions = task_data['instructions']

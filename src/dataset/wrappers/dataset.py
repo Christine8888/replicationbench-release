@@ -45,6 +45,13 @@ class Dataset:
         else:
             return Dataset(**kwargs)
 
+    def to_dict(self):
+        return {
+            'kind': self.kind,
+            'dataset_name': self.dataset_name,
+            'data_instructions': self.data_instructions
+        }
+
 
 @dataclass
 class NoneDataset(Dataset):
@@ -66,6 +73,12 @@ class APIDataset(Dataset):
         # Initialize parent with remaining kwargs
         super().__init__(**kwargs)
 
+    def to_dict(self):
+        data = super().to_dict()
+        data['api_key'] = self.api_key
+        data['api_url'] = self.api_url
+        return data
+
 
 @dataclass
 class LocalDataset(Dataset):
@@ -80,6 +93,12 @@ class LocalDataset(Dataset):
         # Initialize parent with remaining kwargs
         super().__init__(**kwargs)
 
+    def to_dict(self):
+        data = super().to_dict()
+        data['data_path'] = self.data_path
+        data['size'] = self.size
+        return data
+
 
 @dataclass
 class WgetDataset(Dataset):
@@ -93,6 +112,12 @@ class WgetDataset(Dataset):
         self.size = kwargs.pop('size', [])
         # Initialize parent with remaining kwargs
         super().__init__(**kwargs)
+
+    def to_dict(self):
+        data = super().to_dict()
+        data['url'] = self.url
+        data['size'] = self.size
+        return data
 
 
 @dataclass
@@ -124,3 +149,10 @@ class HuggingFaceDataset(Dataset):
 
         # Initialize parent with remaining kwargs (which may include extra fields to ignore)
         super().__init__(**kwargs)
+
+    def to_dict(self):
+        data = super().to_dict()
+        data['hf_name'] = self.hf_name
+        data['hf_split'] = self.hf_split
+        data['hf_type'] = self.hf_type
+        return data

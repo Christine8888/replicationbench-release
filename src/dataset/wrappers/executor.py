@@ -30,3 +30,10 @@ class Executor:
             raise ValueError("code_language is a required field")
         if "dependencies" not in kwargs:
             raise ValueError("dependencies is a required field")
+
+    def to_dict(self):
+        return {
+            'code_language': self.code_language,
+            'dependencies': self.dependencies,
+            'needs_gpu': self.needs_gpu
+        }
