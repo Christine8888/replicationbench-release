@@ -1,4 +1,4 @@
-# ResearchBench: Evaluating Language Models on Scientific Paper Reproduction
+# ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?
 
 ## Overview
 Every paper is associated with the following information:
