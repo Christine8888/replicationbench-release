@@ -20,6 +20,6 @@
     "code_language": "python",
     "dependencies": ["torch", "numpy", "pandas", "datasets", "huggingface-hub", "scikit-learn", "seaborn", "wandb", "tqdm", "matplotlib", "pyyaml", "filelock"]
   },
-"other_instructions": null,
+"other_instructions": "",
 "source": "expert"
 }
