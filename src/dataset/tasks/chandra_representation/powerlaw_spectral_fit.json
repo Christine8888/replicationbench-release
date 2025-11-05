@@ -1,5 +1,5 @@
 {
-    "task_id": "spectral_fit_powerlaw",
+    "task_id": "powerlaw_spectral_fit",
     "paper_id": "chandra_representation",
     "kind": "numeric",
     "difficulty": 5,

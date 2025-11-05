@@ -1,5 +1,5 @@
 {
-    "task_id": "spectral_fit_blackbody",
+    "task_id": "blackbody_spectral_fit",
     "paper_id": "chandra_representation",
     "kind": "numeric",
     "difficulty": 6,
