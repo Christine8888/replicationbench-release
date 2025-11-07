@@ -1,5 +1,5 @@
 {
-  "task_id": "compute_mps",
+  "task_id": "comp_mps",
   "paper_id": "fable_mps",
   "kind": "numeric",
   "difficulty": 5,
