@@ -1,5 +1,3 @@
-"""Load paper text content."""
-
 import os
 
 

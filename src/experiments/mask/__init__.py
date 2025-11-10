@@ -1,1 +1,0 @@
-"""Paper masking experiments."""

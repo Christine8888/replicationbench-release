@@ -1,5 +1,3 @@
-"""Slurm job submission utilities using submitit."""
-
 import logging
 from typing import Dict, Optional
 
