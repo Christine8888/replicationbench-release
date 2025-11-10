@@ -1,5 +1,5 @@
 {
-   "task_id": "compare_mps_fiducial2dmo",
+   "task_id": "fiducial2dmo_compare_mps",
    "paper_id": "fable_mps",
    "kind": "numeric",
    "difficulty": 4,

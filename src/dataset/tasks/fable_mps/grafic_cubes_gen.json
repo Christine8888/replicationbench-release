@@ -1,5 +1,5 @@
 {
-  "task_id": "generate_grafic_cubes",
+  "task_id": "grafic_cubes_gen",
   "paper_id": "fable_mps",
   "kind": "numeric",
   "difficulty": 6,
