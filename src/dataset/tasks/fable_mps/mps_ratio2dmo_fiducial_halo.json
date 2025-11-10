@@ -1,5 +1,5 @@
 {
-  "task_id": "halo_mps_ratio2dmo_fiducial",
+  "task_id": "mps_ratio2dmo_fiducial_halo",
   "paper_id": "fable_mps",
   "kind": "numeric",
   "difficulty": 6,
