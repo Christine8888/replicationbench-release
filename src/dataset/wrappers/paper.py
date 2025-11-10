@@ -23,7 +23,6 @@ class Paper:
     execution_requirements: Optional['Executor'] = None
 
     other_instructions: Optional[str] = None
-    blacklist_packages: List[str] = field(default_factory=list)
 
     full_text: str = ""
     tasks: Dict[str, 'Task'] = field(default_factory=dict)
@@ -45,8 +44,7 @@ class Paper:
             source=data.get('source', 'expert'),
             datasets=_parse_datasets(data.get('dataset', []), data['paper_id']),
             execution_requirements=_parse_executor(data.get('execution_requirements')),
-            other_instructions=data.get('other_instructions'),
-            blacklist_packages=data.get('blacklist_packages', [])
+            other_instructions=data.get('other_instructions')
         )
 
     def get_output(self) -> Dict[str, Any]:
@@ -74,8 +72,7 @@ class Paper:
             'code_available': self.code_available,
             'code_link': self.code_link,
             'source': self.source,
-            'other_instructions': self.other_instructions,
-            'blacklist_packages': self.blacklist_packages,
+            'other_instructions': self.other_instructions
         }
 
         if include_text:

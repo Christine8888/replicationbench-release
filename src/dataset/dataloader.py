@@ -162,7 +162,6 @@ class Dataloader:
                     datasets=_parse_datasets(data.get('dataset', []), data['paper_id']),
                     execution_requirements=_parse_executor(data.get('execution_requirements')),
                     other_instructions=data.get('other_instructions'),
-                    blacklist_packages=data.get('blacklist_packages', []),
                     full_text=data.get('full_text', ''),
                     tasks={}
                 )

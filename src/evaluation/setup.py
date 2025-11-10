@@ -1,5 +1,3 @@
-"""Setup functions for paper evaluation environments."""
-
 import os
 import subprocess
 import logging

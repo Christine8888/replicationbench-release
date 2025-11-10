@@ -1,5 +1,3 @@
-"""CLI for running single paper evaluation."""
-
 import argparse
 import json
 import os
@@ -119,7 +117,6 @@ def main():
     parser.add_argument("--task_types", nargs="+", help="Task types to evaluate")
     parser.add_argument("--no_masking", action="store_true", help="Disable text masking")
 
-    # These have None defaults so config can override them
     parser.add_argument("--message_limit", type=int, default=None)
     parser.add_argument("--token_limit", type=int, default=None)
     parser.add_argument("--execution_timeout", type=int, default=None)
@@ -146,7 +143,6 @@ def main():
             if not hasattr(args, key_lower) or getattr(args, key_lower) is None:
                 setattr(args, key_lower, value)
 
-    # Apply fallback defaults if still None after config loading
     if args.message_limit is None:
         args.message_limit = 500
     if args.token_limit is None:
@@ -162,20 +158,13 @@ def main():
     if args.display is None:
         args.display = "full"
 
-    # Handle boolean config values that use inverted CLI flags
-    # Config uses positive values (CACHE, MASKING, INCLUDE_WORKSPACE)
-    # CLI uses negative flags (--no_cache, --no_masking, --no_workspace)
     if hasattr(args, 'cache') and not args.no_cache:
-        # If config set CACHE and --no_cache wasn't explicitly passed
         args.no_cache = not args.cache
     if hasattr(args, 'masking') and not args.no_masking:
-        # If config set MASKING and --no_masking wasn't explicitly passed
         args.no_masking = not args.masking
     if hasattr(args, 'include_workspace') and not args.no_workspace:
-        # If config set INCLUDE_WORKSPACE and --no_workspace wasn't explicitly passed
         args.no_workspace = not args.include_workspace
 
-    # Verify required args after config loading
     if not args.model:
         parser.error("--model is required (either via CLI or config file)")
 

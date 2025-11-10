@@ -120,16 +120,13 @@ def react_agent(
     Returns:
         ReAct agent
     """
-    if prompt:
-        agent_prompt = AgentPrompt(
-            instructions=prompt,
-            assistant_prompt="Always try again if you are stuck. DO NOT give up early or copy answers. DO NOT submit the task early unless the task is completed, impossible, or running out of tokens/time. NEVER guess values - just submit None for fields you cannot compute."
-        )
-    else:
-        agent_prompt = AgentPrompt(
-            instructions="You are an expert at using code and shell execution to reproduce research papers.",
-            assistant_prompt="Always try again if you are stuck. DO NOT give up early or copy answers. DO NOT submit the task early unless the task is completed, impossible, or running out of tokens/time. NEVER guess values - just submit None for fields you cannot compute."
-        )
+    if not prompt:
+        prompt = "You are an expert at using code and shell execution to reproduce research papers."
+    assistant_prompt = "Always try again if you are stuck. DO NOT give up early or copy answers. DO NOT submit the task early unless the task is completed, impossible, or running out of tokens/time. NEVER guess values - just submit None for fields you cannot compute."
+    agent_prompt = AgentPrompt(
+        instructions=prompt,
+        assistant_prompt=assistant_prompt
+    )
 
     return react(
         name="researcher",
