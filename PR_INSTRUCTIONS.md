@@ -40,7 +40,7 @@ To submit a PR containing new tasks, complete the following steps:
 | Field | Type | Description |
 |-------|------|-------------|
 | `needs_gpu` | boolean | whether the task requires a GPU |
-| `code_language` | string or list[string] | programming language(s) of the code |
+| `code_language` | list[string] | programming language(s) of the code (e.g., `["python"]` or `["C++", "Python"]`) |
 | `dependencies` | list[string] | list of package dependencies |
 
 ### Dataset Specification

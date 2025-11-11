@@ -48,6 +48,7 @@ def run_paper_job(
     paper_id: str,
     config_path: str,
     cluster_config: ClusterConfig,
+    run_name: str,
     needs_gpu: bool = False
 ) -> dict:
     """Execute evaluation for a single paper in Singularity container.
@@ -56,6 +57,7 @@ def run_paper_job(
         paper_id: Paper ID to evaluate
         config_path: Path to experiment config JSON
         cluster_config: Cluster configuration
+        run_name: Run name for logging
         needs_gpu: Whether GPU is needed
 
     Returns:
@@ -84,11 +86,6 @@ def run_paper_job(
 
     if needs_gpu:
         singularity_cmd.append("--nv")
-
-    with open(config_path) as f:
-        exp_config = json.load(f)
-
-    run_name = exp_config.get("RUN_NAME", "evaluation")
 
     # Get src directory (go up from run/ to experiments/ to src/)
     src_dir = Path(__file__).parent.parent.parent.absolute()
@@ -224,6 +221,7 @@ def main():
                 paper_id,
                 args.config,
                 cluster_config,
+                exp_config["RUN_NAME"],
                 needs_gpu
             )
             logger.info(f"Submitted job for {paper_id}")

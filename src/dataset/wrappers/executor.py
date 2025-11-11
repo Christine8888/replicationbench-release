@@ -6,7 +6,7 @@ import warnings
 @dataclass
 class Executor:
     """Execution environment requirements."""
-    code_language: str
+    code_language: List[str]
     dependencies: List[str]
     needs_gpu: bool = False
 
@@ -30,6 +30,10 @@ class Executor:
             raise ValueError("code_language is a required field")
         if "dependencies" not in kwargs:
             raise ValueError("dependencies is a required field")
+
+        # Ensure code_language is always a list (backward compatibility)
+        if isinstance(self.code_language, str):
+            self.code_language = [self.code_language]
 
     def to_dict(self):
         return {

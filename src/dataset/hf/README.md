@@ -62,7 +62,7 @@ configs:
 
 ## Dataset Description
 
-The ReplicationBench dataset contains 114 astrophysics research replication tasks spanning 20 research papers. The dataset includes:
+The ReplicationBench dataset contains 111 astrophysics research replication tasks spanning 20 research papers. The dataset includes:
 - Original and masked manuscript text
 - Metadata (title, abstract, publication info, etc.)
 - Pointers to datasets and dataset access instructions

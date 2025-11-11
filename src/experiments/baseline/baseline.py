@@ -2,14 +2,13 @@
 
 import asyncio
 import json
-import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from inspect_ai.model import get_model, GenerateConfig, Model
+from inspect_ai.model import get_model, GenerateConfig, Model, ChatMessageUser
 
 from dataset.dataloader import Dataloader
 from dataset.wrappers.paper import Paper
@@ -88,7 +87,7 @@ async def generate_completions(
     thinking: bool = False
 ) -> List[str]:
     """Generate n completions concurrently."""
-    messages = [{"role": "user", "content": prompt}]
+    messages = [ChatMessageUser(content=prompt)]
 
     async def get_single_completion(sample_id: int) -> Optional[str]:
         try:
