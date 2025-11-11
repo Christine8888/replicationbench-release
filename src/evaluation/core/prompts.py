@@ -19,7 +19,7 @@ FAILURE HANDLING:
 If you fail to compute a result after multiple attempts, you MUST return None (or a list/array of Nones matching the expected output format). NEVER try to guess values, use phrases like "Let's provide reasonable values", or approximate values from the paper's figures/tables. Simply state that you failed and return None.
 
 IMPORTANT EXECUTION INSTRUCTIONS:
-1. DO NOT assume any variables or state from previous calls are preserved. Each call is independent and you must re-import all necessary packages and redefine all necessary variables. If you want to save code or states more permanently, you must write them to files. You may do this either via the Python tool or the execute_bash tool.
+1. DO NOT assume any variables or state from previous calls are preserved. EACH call to a Python tool or Bash command is independent and you must re-import all necessary packages and redefine all necessary variables. You should use good code organization and frequently save code and intermediate results to files. You may do this either via the Python tool or the execute_bash tool.
 
 You have ample computational resources and execution time. Do not assume you do not have the resources to compute the task. You should make a best effort at every task.
 
@@ -27,10 +27,10 @@ You have ample computational resources and execution time. Do not assume you do 
    - The `execute_python` tool is only for running Python code directly, not executing Python files.
    - Both the Python code interpreter (execute_python) and the Bash tool (execute_bash) are EPHEMERAL - all variables, imports, and state are cleared between each code execution
    - For persistent code, you MUST write Python files (.py) and execute them
-   - Always save your work to files for reuse - don't rely on variables staying in memory
+   - Always save your work to files for reuse - don't rely on variables staying in memory between calls
    - Example: Instead of defining functions in the interpreter, write them to a file like "./analysis.py" and import them
-   - All Python installations should be done using /usr/bin/python3 -m pip install --user. No other installation methods are allowed.
-   - All file downloads and new file writes should be done in your local directory, not in the workspace or in any other users' folders
+   - All Python installations should be done using python3 -m pip install --user. No other installation methods are allowed.
+   - All file downloads and new file writes should be done in your local directory
    - You are encouraged to write all scripts to files, to save script outputs to disk, and execute large amounts of code at once.
 
 3. PATH HANDLING:
@@ -90,18 +90,13 @@ def get_submission_instructions(submit_file: bool = True) -> str:
     return """SUBMISSION INSTRUCTIONS:
 When you are finished, you MUST write your final answer as a valid JSON dictionary to a file named 'submission.json' in your current working directory (the directory shown by pwd at the start).
 
-IMPORTANT:
-- Write submission.json to your LOCAL working directory (e.g., /tmp/something/submission.json), NOT to the workspace directory
-- The workspace directory (e.g., /oak/.../workspace/paper_id/) is READ-ONLY and only contains input data files
-- You cannot write any files to the workspace - it's just for reading datasets and resources
-- The file should be created in the same directory where you run your Python scripts
+IMPORTANT: Write submission.json to your LOCAL working directory (e.g., /tmp/something/submission.json).
 
 PARTIAL SUBMISSION GUIDANCE:
 - You should save your progress FREQUENTLY by updating submission.json after completing each task
 - Initialize submission.json early with None values for all expected fields
 - Update each field as soon as you compute its value
 - This ensures partial credit if you run out of time or tokens
-- ONLY record a value in submission.json when you are 100% confident it's correct and complete
 - Use None for any results you haven't computed yet or cannot compute
 - Even if you have not successfully computed any result, you should still submit a submission.json file with None values for all fields.
 - If you do not produce a submission.json file, you will receive a 0 score.
@@ -145,7 +140,7 @@ def get_executor_instructions(executor) -> str:
     out += f"You will be able to execute code in the following programming language(s): {languages}\n"
     out += f"You will have access to the following Python packages: {', '.join(executor.dependencies)}\n"
     out += "These packages are pre-installed. You SHOULD NOT re-install them.\n"
-    out += "You can download and install additional packages using '/usr/bin/python3 -m pip install --user <package>' if needed.\n"
+    out += "You can download and install additional packages using 'python3 -m pip install --user <package>' if needed.\n"
 
     return out
 
