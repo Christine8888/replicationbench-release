@@ -56,21 +56,19 @@ configs:
 ---
 
 # ReplicationBench
+**arXiv**: [ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?](https://arxiv.org/abs/2510.24591)
 
-**ResearchBench** is an AI evaluation benchmark that tests whether AI agents can replicate real astrophysics research papers from scratch.
-
-**Paper**: [ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?](https://arxiv.org/abs/2510.24591)
-
-**GitHub Repository**: [https://github.com/Christine8888/replicationbench-release](https://github.com/Christine8888/replicationbench-release)
+**GitHub**: [https://github.com/Christine8888/replicationbench-release](https://github.com/Christine8888/replicationbench-release)
 
 ## Dataset Description
 
-This dataset contains 31 astrophysics research papers with 174 associated tasks that test various aspects of reproducibility. Each paper includes:
-- Full manuscript text
+The ReplicationBench dataset contains 114 astrophysics research replication tasks spanning 20 research papers. The dataset includes:
+- Original and masked manuscript text
 - Metadata (title, abstract, publication info, etc.)
-- Dataset access information
+- Pointers to datasets and dataset access instructions
+- Additional specifications from the authors
 - Execution requirements
-- Multiple numeric tasks with expected outputs and tolerances
+- Detailed descriptions and grading guidelines for each task
 
 ## Usage
 
@@ -83,6 +81,8 @@ papers_ds = load_dataset("ChristineYe8/replicationbench", split="papers")
 # Load tasks
 tasks_ds = load_dataset("ChristineYe8/replicationbench", split="tasks")
 ```
+
+You can load the dataset from HuggingFace into native ReplicationBench format using [this script](https://github.com/Christine8888/replicationbench-release/blob/main/src/dataset/hf/load_from_hf.py). However, if using RB's native formats, we recommend using the native data loading instead, described [here](https://github.com/Christine8888/replicationbench-release).
 
 ## Citation
 

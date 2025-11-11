@@ -7,4 +7,3 @@
 !PR_INSTRUCTIONS.md
 __pycache__/
 *.pyc
-src/experiments
