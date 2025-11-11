@@ -18,9 +18,9 @@ class ClusterConfig:
     n_parallel: int = 20
     cpu_partition: str = "kipac,normal"
     gpu_partition: str = "owners"
-    time_hours: int = 9  # Increased to allow TIME_LIMIT (6h) + EXECUTION_TIMEOUT (2h) + buffer
+    time_hours: int = 9  # Allows TIME_LIMIT (6h) + EXECUTION_TIMEOUT (2h) + 1h buffer
     cpus_per_task: int = 4
-    mem_gb: int = 256
+    mem_gb: int = 32
 
 
 DEFAULT_CONFIG = ClusterConfig()
