@@ -18,7 +18,6 @@
     },
     "execution_requirements": {
         "needs_gpu": false,
-        "needs_browsing": false,
         "code_language": "python",
         "dependencies": ["astropy", "dustmaps", "astroquery", "numpy", "corner", "emcee"]
     },

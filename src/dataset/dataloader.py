@@ -122,14 +122,14 @@ class Dataloader:
         return matching
 
     @classmethod
-    def from_jsonl(cls, jsonl_path: str) -> 'Dataloader':
-        """Load papers from JSONL file.
+    def from_dicts(cls, paper_dicts: List[Dict[str, Any]]) -> 'Dataloader':
+        """Load papers from list of dictionaries.
 
         Args:
-            jsonl_path: Path to JSONL file
+            paper_dicts: List of paper dictionaries with metadata and tasks
 
         Returns:
-            Dataloader instance with papers loaded from JSONL
+            Dataloader instance with papers loaded from dicts
         """
         from datetime import datetime
         from .wrappers.paper import _parse_datasets, _parse_executor
@@ -144,50 +144,61 @@ class Dataloader:
         loader.load_text = True
         loader.masked = True
 
-        with open(jsonl_path, 'r') as f:
-            for line in f:
-                data = json.loads(line)
+        for data in paper_dicts:
+            pub_date = datetime.strptime(data['publication_date'], "%Y-%m-%d")
 
-                pub_date = datetime.strptime(data['publication_date'], "%Y-%m-%d")
+            paper = Paper(
+                paper_id=data['paper_id'],
+                title=data['title'],
+                abstract=data['abstract'],
+                publication_date=pub_date,
+                paper_link=data.get('paper_link', ''),
+                code_available=data.get('code_available', False),
+                code_link=data.get('code_link'),
+                source=data.get('source', 'expert'),
+                datasets=_parse_datasets(data.get('dataset', []), data['paper_id']),
+                execution_requirements=_parse_executor(data.get('execution_requirements')),
+                other_instructions=data.get('other_instructions'),
+                full_text=data.get('full_text', ''),
+                tasks={}
+            )
 
-                paper = Paper(
-                    paper_id=data['paper_id'],
-                    title=data['title'],
-                    abstract=data['abstract'],
-                    publication_date=pub_date,
-                    paper_link=data.get('paper_link', ''),
-                    code_available=data.get('code_available', False),
-                    code_link=data.get('code_link'),
-                    source=data.get('source', 'expert'),
-                    datasets=_parse_datasets(data.get('dataset', []), data['paper_id']),
-                    execution_requirements=_parse_executor(data.get('execution_requirements')),
-                    other_instructions=data.get('other_instructions'),
-                    full_text=data.get('full_text', ''),
-                    tasks={}
-                )
+            if 'tasks' in data:
+                for task_id, task_data in data['tasks'].items():
+                    instructions = task_data['instructions']
+                    if isinstance(instructions, str):
+                        instructions = [instructions]
 
-                if 'tasks' in data:
-                    for task_id, task_data in data['tasks'].items():
-                        instructions = task_data['instructions']
-                        if isinstance(instructions, str):
-                            instructions = [instructions]
+                    task = Task(
+                        task_id=task_data['task_id'],
+                        paper_id=task_data['paper_id'],
+                        kind=task_data['kind'],
+                        difficulty=task_data['difficulty'],
+                        description=task_data['description'],
+                        instructions=instructions,
+                        expected_output=task_data['expected_output'],
+                        tolerance=task_data['tolerance'],
+                        parents=task_data.get('parents')
+                    )
+                    paper.tasks[task_id] = task
 
-                        task = Task(
-                            task_id=task_data['task_id'],
-                            paper_id=task_data['paper_id'],
-                            kind=task_data['kind'],
-                            difficulty=task_data['difficulty'],
-                            description=task_data['description'],
-                            instructions=instructions,
-                            expected_output=task_data['expected_output'],
-                            tolerance=task_data['tolerance'],
-                            parents=task_data.get('parents')
-                        )
-                        paper.tasks[task_id] = task
-
-                loader.papers[paper.paper_id] = paper
+            loader.papers[paper.paper_id] = paper
 
         return loader
+
+    @classmethod
+    def from_jsonl(cls, jsonl_path: str) -> 'Dataloader':
+        """Load papers from JSONL file.
+
+        Args:
+            jsonl_path: Path to JSONL file
+
+        Returns:
+            Dataloader instance with papers loaded from JSONL
+        """
+        with open(jsonl_path, 'r') as f:
+            paper_dicts = [json.loads(line) for line in f]
+        return cls.from_dicts(paper_dicts)
 
     def export_to_jsonl(
         self,

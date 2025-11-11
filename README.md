@@ -4,6 +4,8 @@
 
 **Paper**: [ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?](https://arxiv.org/abs/2510.24591)
 
+![ReplicationBench Overview](./figure_1.png)
+
 ## Setup
 
 ```bash

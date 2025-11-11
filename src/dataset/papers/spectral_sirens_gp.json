@@ -20,7 +20,6 @@
     },
     "execution_requirements": {
       "needs_gpu": true,
-      "needs_browsing": false,
       "code_language": "python",
       "dependencies": ["numpy", "scipy", "matplotlib", "numpyro", "jax", "tinygp", "arviz", "netCDF4", "xarray", "scikit-learn"]
     },
