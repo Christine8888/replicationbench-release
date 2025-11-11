@@ -21,8 +21,7 @@ def export_papers(loader, output_path, include_text=True):
                 'source': paper.source,
                 'dataset': [ds.to_dict() for ds in paper.datasets],
                 'execution_requirements': paper.execution_requirements.to_dict() if paper.execution_requirements else None,
-                'other_instructions': paper.other_instructions,
-                'blacklist_packages': paper.blacklist_packages
+                'other_instructions': paper.other_instructions
             }
 
             if include_text:

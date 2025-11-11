@@ -30,8 +30,15 @@ class Paper:
     @classmethod
     def from_json(cls, json_path: str) -> 'Paper':
         """Load paper metadata from JSON file."""
-        with open(json_path, 'r') as f:
-            data = json.load(f)
+        try:
+            with open(json_path, 'r') as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(
+                f"Error parsing {json_path}: {e.msg}",
+                e.doc,
+                e.pos
+            ) from e
 
         return cls(
             paper_id=data['paper_id'],

@@ -17,8 +17,7 @@
     "execution_requirements": {
       "code_language": "python",
       "dependencies": ["numpy", "scipy", "matplotlib"],
-      "needs_gpu": false,
-      "needs_browsing": false
+      "needs_gpu": false
     },
     "other_instructions": "All tasks require basic knowledge of astrophysics, stellar evolution, and numerical methods. The data processing tasks involve understanding of carbon-oxygen core masses (MCO), metallicity (Z), and the physics of pulsational-pair instability supernovae.",
     "source": "showyourwork"
