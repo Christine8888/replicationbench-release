@@ -160,7 +160,7 @@ def get_dataset_instructions(dataset, workspace: Optional[str] = None, include_w
     Returns:
         Formatted instruction string
     """
-    from dataset.wrappers.dataset import APIDataset, WgetDataset
+    from dataset.wrappers.dataset import APIDataset, WgetDataset, HuggingFaceDataset, NoneDataset
 
     prompt = f"\n\nDATASET {dataset.dataset_name.upper()} INSTRUCTIONS:\n"
     prompt += "----------------------------------\n\n"
@@ -179,7 +179,13 @@ def get_dataset_instructions(dataset, workspace: Optional[str] = None, include_w
         prompt += f"URLs: {', '.join(dataset.url)}\n"
         prompt += f"Sizes (MB): {', '.join(str(s) for s in dataset.size)}\n"
 
-    if workspace and include_workspace:
+    if isinstance(dataset, HuggingFaceDataset):
+        if dataset.hf_name:
+            prompt += f"HuggingFace Dataset Names: {dataset.hf_name}\n"
+        if dataset.hf_link:
+            prompt += f"HuggingFace Dataset Links: {dataset.hf_link}\n"
+
+    if workspace and include_workspace and not isinstance(dataset, NoneDataset):
         prompt += f"\n\nPLEASE NOTE: This data has already been downloaded and is accessible in the {workspace} directory. DO NOT download the data again.\n"
 
     return prompt

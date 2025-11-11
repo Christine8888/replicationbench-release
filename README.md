@@ -89,9 +89,9 @@ from evaluation.run_single import run_single_evaluation
 
 run_single_evaluation(
     paper_id="gw_cosmo",
-    model="anthropic/claude-3-5-sonnet-20241022",
+    model="anthropic/claude-sonnet-4-5",
     log_dir="./logs/my_run",
-    workspace_base="./workspaces"  # Will use ./workspaces/gw_cosmo
+    workspace_base="./workspaces"
 )
 ```
 
