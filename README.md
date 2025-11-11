@@ -1,6 +1,6 @@
 # ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?
 
-[arXiv](https://arxiv.org/abs/2510.24591)
+ReplicationBench evaluates whether AI agents can replicate real astrophysics research papers from scratch. The dataset consists of 111 astrophysics research replication tasks spanning 20 research papers, which can be run and evaluated in computational sandboxes and scored objectively against the original results. Read the paper on [arXiv](https://arxiv.org/abs/2510.24591) for more details.
 
 ![ReplicationBench Overview](./figure_1.png)
 
@@ -94,6 +94,10 @@ run_single_evaluation(
     workspace_base="./workspaces"  # Will use ./workspaces/gw_cosmo
 )
 ```
+
+## Known Issues
+- Agents may occasionally guess answers currently due to random chance or general domain knowledge. We strongly suggest filtering and penalizing traces with "guessing" behavior
+- Neither this codebase nor TerminalBench provide safeguards preventing agents from accessing the answers via web browsing tools, such as by finding source code or reading the original paper manuscript. This does not appear in our evaluations but may affect the fidelity of future evaluations.
 
 ## Contributing
 
