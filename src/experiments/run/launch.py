@@ -91,9 +91,9 @@ def run_paper_job(
     src_dir = Path(__file__).parent.parent.parent.absolute()
 
     bash_cmd = (
-        f"export PYTHONUSERBASE=/usr/local && "
-        f"export PYTHONPATH={src_dir}:{cluster_config.home_dir}/.local/lib/python3.12/site-packages:$PYTHONPATH && "
-        f"export PATH=/usr/local/bin:$PATH && "
+        f"export PYTHONUSERBASE=/tmp/.local && "
+        f"export PYTHONPATH=/tmp/.local/lib/python3.12/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.12/site-packages:$PYTHONPATH && "
+        f"export PATH=/tmp/.local/bin:/usr/local/bin:$PATH && "
         f"export HOME=/tmp && "
         f"export GALPYRC=/tmp/.galpyrc && "
         f"export XDG_CONFIG_HOME=/tmp/.config && "
@@ -105,7 +105,8 @@ def run_paper_job(
         f"python3 -m evaluation.run_single "
         f"--paper_id {paper_id} "
         f"--config {config_path} "
-        f"--log_dir {cluster_config.inspect_log_dir}/{run_name}/logs"
+        f"--log_dir {cluster_config.inspect_log_dir}/{run_name}/logs "
+        f"--workspace {paper_workspace}"
     )
 
     singularity_cmd.extend([

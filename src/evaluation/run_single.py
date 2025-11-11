@@ -15,7 +15,7 @@ def run_single_evaluation(
     paper_id: str,
     model: str,
     log_dir: str,
-    workspace_base: Optional[str] = None,
+    workspace: Optional[str] = None,
     papers_dir: Optional[str] = None,
     tasks_dir: Optional[str] = None,
     manuscripts_dir: Optional[str] = None,
@@ -37,7 +37,7 @@ def run_single_evaluation(
         paper_id: Paper ID to evaluate
         model: Model name for Inspect AI
         log_dir: Directory for evaluation logs
-        workspace_base: Base workspace directory (paper-specific path will be constructed as workspace_base/paper_id)
+        workspace: Paper-specific workspace directory (e.g., /workspace/paper_id)
         papers_dir: Papers directory (optional, uses default if None)
         tasks_dir: Tasks directory (optional, uses default if None)
         manuscripts_dir: Manuscripts directory (optional, uses default if None)
@@ -71,11 +71,10 @@ def run_single_evaluation(
         raise ValueError(f"Paper {paper_id} not found")
 
     paper_obj = loader.papers[paper_id]
-    paper_workspace = f"{workspace_base}/{paper_id}" if workspace_base else None
 
     task = paper_task(
         paper_obj=paper_obj,
-        workspace=paper_workspace,
+        workspace=workspace,
         attempts=attempts,
         message_limit=message_limit,
         token_limit=token_limit,
@@ -109,7 +108,7 @@ def main():
     parser.add_argument("--model", "-m", help="Model name (required if not in config)")
     parser.add_argument("--log_dir", "-l", required=True, help="Log directory")
 
-    parser.add_argument("--workspace_base", help="Base workspace directory")
+    parser.add_argument("--workspace", help="Paper-specific workspace directory")
     parser.add_argument("--papers_dir", help="Papers directory")
     parser.add_argument("--tasks_dir", help="Tasks directory")
     parser.add_argument("--manuscripts_dir", help="Manuscripts directory")
@@ -172,7 +171,7 @@ def main():
         paper_id=args.paper_id,
         model=args.model,
         log_dir=args.log_dir,
-        workspace_base=args.workspace_base,
+        workspace=args.workspace,
         papers_dir=args.papers_dir,
         tasks_dir=args.tasks_dir,
         manuscripts_dir=args.manuscripts_dir,
