@@ -91,7 +91,7 @@ run_single_evaluation(
     paper_id="gw_cosmo",
     model="anthropic/claude-sonnet-4-5",
     log_dir="./logs/my_run",
-    workspace_base="./workspaces"
+    workspace="./workspaces/gw_cosmo"
 )
 ```
 
