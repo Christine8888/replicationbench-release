@@ -1,16 +1,15 @@
 # ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?
 
-**ResearchBench** is an AI evaluation benchmark that tests whether AI agents can replicate real astrophysics research papers from scratch. The benchmark includes **31 papers** with **174 tasks** that decompose papers into core research contributions including experimental design, mathematical derivations, data analysis, and code implementation.
-
-**Paper**: [ReplicationBench: Can AI Agents Replicate Astrophysics Research Papers?](https://arxiv.org/abs/2510.24591)
+[arXiv](https://arxiv.org/abs/2510.24591)
 
 ![ReplicationBench Overview](./figure_1.png)
 
 ## Setup
+You can install the dataset and its dependencies as follows:
 
 ```bash
-git clone https://github.com/Christine8888/researchbench-release.git
-cd researchbench-release
+git clone https://github.com/Christine8888/replicationbench-release.git
+cd replicationbench-release
 
 # Basic installation -- for dataset loading only
 uv pip install -e .
@@ -120,4 +119,4 @@ If you use ReplicationBench in your work, please cite:
 
 ## License
 
-ResearchBench is released under the MIT License. See [LICENSE](LICENSE) for details.
+ReplicationBench is released under the MIT License. See [LICENSE](LICENSE) for details.
