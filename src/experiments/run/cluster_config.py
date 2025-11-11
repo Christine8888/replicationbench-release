@@ -16,7 +16,7 @@ class ClusterConfig:
     api_key_path: str = "/home/users/cye/researchbench/config.sh"
 
     n_parallel: int = 20
-    cpu_partition: str = "kipac"
+    cpu_partition: str = "kipac,normal"
     gpu_partition: str = "owners"
     time_hours: int = 9  # Increased to allow TIME_LIMIT (6h) + EXECUTION_TIMEOUT (2h) + buffer
     cpus_per_task: int = 4
