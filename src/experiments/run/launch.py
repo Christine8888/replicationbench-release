@@ -72,7 +72,6 @@ def run_paper_job(
 
     singularity_cmd = [
         "/usr/bin/singularity", "exec",
-        "--overlay", overlay_path,
         "--bind", f"{paper_workspace}:{paper_workspace}:ro",
         "--bind", f"{overlay_path}:{overlay_path}:rw",
         "--bind", f"{cluster_config.home_dir}:{cluster_config.home_dir}:ro",
@@ -92,7 +91,7 @@ def run_paper_job(
 
     bash_cmd = (
         f"export PYTHONUSERBASE=/tmp/.local && "
-        f"export PYTHONPATH=/tmp/.local/lib/python3.12/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.12/site-packages:$PYTHONPATH && "
+        f"export PYTHONPATH={overlay_path}/lib/python3.11/site-packages:/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
         f"export PATH=/tmp/.local/bin:/usr/local/bin:$PATH && "
         f"export HOME=/tmp && "
         f"export GALPYRC=/tmp/.galpyrc && "
