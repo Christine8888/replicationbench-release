@@ -50,21 +50,8 @@ def install_packages_in_overlay(
         return
 
     if needs_gpu and 'torch' in packages:
-        logger.info("GPU required: installing CUDA-enabled PyTorch (cu124)")
-        torch_cmd = [
-            "singularity", "exec",
-            "--overlay", overlay_dir,
-            singularity_image,
-            "bash", "-lc",
-            "python3 -m pip install --force-reinstall --no-deps torch --index-url https://download.pytorch.org/whl/cu124"
-        ]
-        try:
-            result = subprocess.run(torch_cmd, check=True, capture_output=True, text=True)
-            logger.info(f"Successfully installed CUDA-enabled PyTorch: {result.stdout}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to install CUDA PyTorch: {e.stderr}")
-            raise
-
+        logger.info("GPU required: torch already installed in base image, skipping")
+        # Remove torch from packages list since it's in the base image
         packages = [pkg for pkg in packages if pkg != 'torch']
 
     if not packages:

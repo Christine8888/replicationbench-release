@@ -1,0 +1,85 @@
+Bootstrap: docker
+From: nvidia/cuda:12.4.0-base-ubuntu22.04
+
+%post
+    # Update and install basic tools
+    apt-get update && apt-get install -y \
+        python3.12 \
+        python3-pip \
+        python3.12-dev \
+        build-essential \
+        gcc \
+        g++ \
+        gfortran \
+        git \
+        curl \
+        wget \
+        vim \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Make python3 point to python3.12
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
+
+    # Upgrade pip
+    python3 -m pip install --upgrade pip setuptools wheel
+
+    # Install scientific Python packages
+    python3 -m pip install \
+        numpy \
+        scipy \
+        matplotlib \
+        pandas \
+        astropy \
+        scikit-learn \
+        scikit-image \
+        seaborn \
+        datasets \
+        wget \
+        plotly \
+        sympy \
+        networkx \
+        numba \
+        h5py \
+        tqdm \
+        pyyaml \
+        toml \
+        requests \
+        filelock
+
+    # Install PyTorch with CUDA 12.4 support
+    python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu124
+
+    # Install inspect-ai
+    python3 -m pip install inspect-ai
+
+    # Install additional useful tools
+    python3 -m pip install \
+        jupyter \
+        ipython \
+        black \
+        pytest
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/bin:$PATH
+    export PYTHONPATH=/usr/local/lib/python3.12/site-packages:$PYTHONPATH
+
+%runscript
+    exec "$@"
+
+%labels
+    Author christine
+    Version 1.0
+    Description Inspect AI environment with Python scientific stack and CUDA support
+
+%help
+    This container provides:
+    - Python 3.12
+    - Scientific Python stack (numpy, scipy, matplotlib, astropy, etc.)
+    - PyTorch with CUDA 12.4 support
+    - Inspect AI framework
+    - C/C++ compilers (gcc, g++)
+
+    Usage:
+        singularity exec image.sif python3 script.py
+        singularity exec --nv image.sif python3 gpu_script.py  # with GPU support
