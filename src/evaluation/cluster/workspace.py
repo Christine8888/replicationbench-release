@@ -56,7 +56,7 @@ def install_packages_in_overlay(
             "--overlay", overlay_dir,
             singularity_image,
             "bash", "-lc",
-            "python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu124"
+            "python3 -m pip install --force-reinstall --no-deps torch --index-url https://download.pytorch.org/whl/cu124"
         ]
         try:
             result = subprocess.run(torch_cmd, check=True, capture_output=True, text=True)
