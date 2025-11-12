@@ -67,9 +67,13 @@ def load_eval_logs_to_dataframe(
             model = "o3"
         elif "o4-mini" in dir_name:
             model = "o4-mini"
-        elif "sonnet-37" in dir_name or "sonnet-3.7" in dir_name:
+        elif "gpt5" in dir_name or "gpt-5" in dir_name:
+            model = "GPT-5"
+        elif "claude-45" in dir_name or "sonnet-45" in dir_name or "sonnet-4.5" in dir_name:
+            model = "Sonnet 4.5"
+        elif "claude-37" in dir_name or "sonnet-37" in dir_name or "sonnet-3.7" in dir_name:
             model = "Sonnet 3.7"
-        elif "sonnet-4" in dir_name:
+        elif "claude-4" in dir_name or "sonnet-4" in dir_name:
             model = "Sonnet 4"
         elif "gemini-25" in dir_name or "gemini-2.5" in dir_name:
             model = "Gemini 2.5"
@@ -112,6 +116,8 @@ def load_eval_logs_to_dataframe(
                 "output_tokens": metadata["token_stats"]["output_tokens"],
                 "reasoning_tokens": metadata["token_stats"]["reasoning_tokens"],
                 "runtime_minutes": metadata["runtime_minutes"],
+                "llm_time_minutes": metadata["llm_time_minutes"],
+                "tool_time_minutes": metadata["tool_time_minutes"],
                 "has_transcript": metadata["has_transcript"],
                 "task_score": None,
                 "task_difficulty": None
@@ -137,6 +143,8 @@ def load_eval_logs_to_dataframe(
                         "output_tokens": None,
                         "reasoning_tokens": None,
                         "runtime_minutes": None,
+                        "llm_time_minutes": None,
+                        "tool_time_minutes": None,
                         "has_transcript": None,
                         "task_score": task_score,
                         "task_difficulty": task.difficulty
@@ -175,29 +183,52 @@ def aggregate_runs(df: pd.DataFrame, metric: str, agg_func: str = "mean") -> pd.
 
 
 def get_model_summary_stats(df: pd.DataFrame) -> pd.DataFrame:
-    """Get summary statistics for each model across all papers and runs."""
+    """Get summary statistics for each model across all papers and runs.
+
+    For best-of-N: Takes best across runs for each paper, then averages across papers.
+    For avg-of-N: Takes average across runs for each paper, then averages across papers.
+    """
     summary_df = df[df.index.get_level_values("task") == "_summary"].copy()
 
     stats = []
     for model in summary_df.index.get_level_values("model").unique():
         model_data = summary_df.xs(model, level="model")
 
-        accuracy_by_run = model_data.groupby('run')['accuracy'].mean()
-        average_accuracy = accuracy_by_run.mean()
-        std_accuracy = accuracy_by_run.std()
-        best_accuracy = accuracy_by_run.max()
+        # For each paper, get best and average accuracy across runs
+        best_per_paper = model_data.groupby('paper')['accuracy'].max()
+        avg_per_paper = model_data.groupby('paper')['accuracy'].mean()
+
+        # Average those per-paper values across all papers
+        best_accuracy = best_per_paper.mean()
+        average_accuracy = avg_per_paper.mean()
+
+        # Bootstrap std over all paper-run combinations (3 runs × N papers samples)
+        all_samples = model_data['accuracy'].values
+        bootstrap_means = []
+        rng = np.random.RandomState(42)
+        n_bootstrap = 10000
+        for _ in range(n_bootstrap):
+            sample = rng.choice(all_samples, size=len(all_samples), replace=True)
+            bootstrap_means.append(sample.mean())
+        std_accuracy = np.std(bootstrap_means)
+
+        # Same for difficulty-weighted
+        best_dw_per_paper = model_data.groupby('paper')['difficulty_weighted_accuracy'].max()
+        avg_dw_per_paper = model_data.groupby('paper')['difficulty_weighted_accuracy'].mean()
 
         stats.append({
             "Model": model,
             "Avg Accuracy": average_accuracy,
             "Std Accuracy": std_accuracy,
             "Best Accuracy": best_accuracy,
-            "Avg Difficulty-Weighted": model_data["difficulty_weighted_accuracy"].mean(),
-            "Best Difficulty-Weighted": model_data["difficulty_weighted_accuracy"].max(),
+            "Avg Difficulty-Weighted": avg_dw_per_paper.mean(),
+            "Best Difficulty-Weighted": best_dw_per_paper.mean(),
             "Avg Response Rate": model_data["response_rate"].mean(),
             "Avg Output Tokens": model_data["output_tokens"].mean(),
             "Avg Reasoning Tokens": model_data["reasoning_tokens"].mean(),
-            "Avg Runtime (min)": model_data["runtime_minutes"].mean()
+            "Avg Runtime (min)": model_data["runtime_minutes"].mean(),
+            "Avg LLM Time (min)": model_data["llm_time_minutes"].mean(),
+            "Avg Tool Time (min)": model_data["tool_time_minutes"].mean()
         })
 
     return pd.DataFrame(stats).set_index("Model")

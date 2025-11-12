@@ -29,6 +29,8 @@ def extract_metadata(eval_log) -> Dict[str, Any]:
         "started_at": None,
         "completed_at": None,
         "runtime_minutes": None,
+        "llm_time_minutes": None,
+        "tool_time_minutes": None,
         "accuracy": 0.0,
         "task_results": {},
         "response_stats": {
@@ -68,6 +70,25 @@ def extract_metadata(eval_log) -> Dict[str, Any]:
             metadata["token_stats"]["total_tokens"] += usage.total_tokens
             if hasattr(usage, 'reasoning_tokens') and usage.reasoning_tokens is not None:
                 metadata["token_stats"]["reasoning_tokens"] += usage.reasoning_tokens
+
+    # Extract timing breakdown from events
+    if hasattr(eval_log, 'samples') and eval_log.samples:
+        for sample in eval_log.samples:
+            if hasattr(sample, 'events') and sample.events:
+                llm_time = 0.0
+                tool_time = 0.0
+
+                for event in sample.events:
+                    event_type = type(event).__name__
+                    if hasattr(event, 'working_time') and event.working_time:
+                        if event_type == 'ModelEvent':
+                            llm_time += event.working_time
+                        elif event_type == 'ToolEvent':
+                            tool_time += event.working_time
+
+                metadata["llm_time_minutes"] = llm_time / 60
+                metadata["tool_time_minutes"] = tool_time / 60
+                break  # Only process first sample
 
     if eval_log.results and eval_log.results.scores:
         for score in eval_log.results.scores:

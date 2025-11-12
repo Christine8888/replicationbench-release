@@ -34,7 +34,8 @@ def setup_paper_workspace(
 def install_packages_in_overlay(
     packages: List[str],
     overlay_dir: str,
-    singularity_image: str
+    singularity_image: str,
+    needs_gpu: bool = False
 ) -> None:
     """Install Python packages into Singularity overlay.
 
@@ -42,10 +43,17 @@ def install_packages_in_overlay(
         packages: List of package specifications
         overlay_dir: Path to overlay directory
         singularity_image: Path to Singularity image
+        needs_gpu: Whether GPU is needed (will install CUDA-enabled torch)
     """
     if not packages:
         logger.info("No packages to install")
         return
+
+    # Replace 'torch' with CUDA version if GPU is needed
+    if needs_gpu and 'torch' in packages:
+        packages = [pkg if pkg != 'torch' else 'torch --index-url https://download.pytorch.org/whl/cu124'
+                   for pkg in packages]
+        logger.info("GPU required: installing CUDA-enabled PyTorch (cu124)")
 
     logger.info(f"Installing {len(packages)} packages to overlay")
 
@@ -116,6 +124,7 @@ def prepare_workspace_for_evaluation(
     if install_deps and paper.execution_requirements:
         overlay_dir = os.path.join(paper_workspace, "overlay")
         dependencies = paper.execution_requirements.dependencies
-        install_packages_in_overlay(dependencies, overlay_dir, singularity_image)
+        needs_gpu = paper.execution_requirements.needs_gpu
+        install_packages_in_overlay(dependencies, overlay_dir, singularity_image, needs_gpu)
 
     return paper_workspace
