@@ -35,7 +35,8 @@ def install_packages_in_overlay(
     packages: List[str],
     overlay_dir: str,
     singularity_image: str,
-    needs_gpu: bool = False
+    needs_gpu: bool = False,
+    nobatch: bool = False
 ) -> None:
     """Install Python packages into Singularity overlay.
 
@@ -44,12 +45,28 @@ def install_packages_in_overlay(
         overlay_dir: Path to overlay directory
         singularity_image: Path to Singularity image
         needs_gpu: Whether GPU is needed (will install CUDA-enabled torch)
+        nobatch: Whether to skip batch install and install packages individually
     """
     if not packages:
         logger.info("No packages to install")
         return
-        
+
+    # If GPU is needed and torch is in packages, skip it (already in base image)
+    if needs_gpu and 'torch' in packages:
+        logger.info("GPU required: torch already installed in base image, skipping")
+        packages = [pkg for pkg in packages if pkg != 'torch']
+
+    if not packages:
+        logger.info("No additional packages to install")
+        return
+
     logger.info(f"Installing {len(packages)} additional packages to overlay")
+
+    # Skip batch install if nobatch flag is set
+    if nobatch:
+        logger.info("--nobatch flag set, installing packages individually")
+        _install_packages_individually(packages, overlay_dir, singularity_image)
+        return
 
     install_cmd = [
         "singularity", "exec",
@@ -60,10 +77,10 @@ def install_packages_in_overlay(
     ]
 
     try:
-        subprocess.run(install_cmd, check=True)
+        subprocess.run(install_cmd, check=True, capture_output=True, text=True)
         logger.info("Successfully installed all packages")
     except subprocess.CalledProcessError as e:
-        logger.warning(f"Batch install failed")
+        logger.warning(f"Batch install failed: {e.stderr}")
         _install_packages_individually(packages, overlay_dir, singularity_image)
 
 
@@ -83,10 +100,10 @@ def _install_packages_individually(
         ]
 
         try:
-            subprocess.run(install_cmd, check=True)
+            subprocess.run(install_cmd, check=True, capture_output=True, text=True)
             logger.info(f"Successfully installed {pkg}")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Could not install {pkg}")
+            logger.error(f"Could not install {pkg}: {e.stderr}")
 
 
 def prepare_workspace_for_evaluation(
@@ -94,7 +111,8 @@ def prepare_workspace_for_evaluation(
     workspace_base: str,
     singularity_image: str,
     download_data: bool = True,
-    install_deps: bool = True
+    install_deps: bool = True,
+    nobatch: bool = False
 ) -> str:
     """Prepare complete workspace for paper evaluation.
 
@@ -104,6 +122,7 @@ def prepare_workspace_for_evaluation(
         singularity_image: Path to Singularity image
         download_data: Whether to download datasets
         install_deps: Whether to install dependencies
+        nobatch: Whether to skip batch install and install packages individually
 
     Returns:
         Path to paper workspace
@@ -119,6 +138,6 @@ def prepare_workspace_for_evaluation(
         overlay_dir = os.path.join(paper_workspace, "overlay")
         dependencies = paper.execution_requirements.dependencies
         needs_gpu = paper.execution_requirements.needs_gpu
-        install_packages_in_overlay(dependencies, overlay_dir, singularity_image, needs_gpu)
+        install_packages_in_overlay(dependencies, overlay_dir, singularity_image, needs_gpu, nobatch)
 
     return paper_workspace
