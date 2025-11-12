@@ -20,7 +20,7 @@ class ClusterConfig:
     gpu_partition: str = "owners"
     time_hours: int = 9  # Allows TIME_LIMIT (6h) + EXECUTION_TIMEOUT (2h) + 1h buffer
     cpus_per_task: int = 4
-    mem_gb: int = 32
+    mem_gb: int = 128
 
 
 DEFAULT_CONFIG = ClusterConfig()
