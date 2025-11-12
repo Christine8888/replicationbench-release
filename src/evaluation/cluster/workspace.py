@@ -60,12 +60,16 @@ def install_packages_in_overlay(
 
     logger.info(f"Installing {len(packages)} additional packages to overlay")
 
+    # Create site-packages directory in overlay
+    overlay_site_packages = os.path.join(overlay_dir, "lib", "python3.11", "site-packages")
+    os.makedirs(overlay_site_packages, exist_ok=True)
+
     install_cmd = [
         "singularity", "exec",
-        "--overlay", overlay_dir,
+        "--bind", f"{overlay_dir}:/overlay:rw",
         singularity_image,
         "bash", "-lc",
-        f"python3 -m pip install {' '.join(packages)}"
+        f"python3 -m pip install --target /overlay/lib/python3.11/site-packages {' '.join(packages)}"
     ]
 
     try:
@@ -85,10 +89,10 @@ def _install_packages_individually(
     for pkg in packages:
         install_cmd = [
             "singularity", "exec",
-            "--overlay", overlay_dir,
+            "--bind", f"{overlay_dir}:/overlay:rw",
             singularity_image,
             "bash", "-lc",
-            f'python3 -m pip install "{pkg}"'
+            f'python3 -m pip install --target /overlay/lib/python3.11/site-packages "{pkg}"'
         ]
 
         try:
