@@ -48,28 +48,15 @@ def install_packages_in_overlay(
     if not packages:
         logger.info("No packages to install")
         return
-
-    if needs_gpu and 'torch' in packages:
-        logger.info("GPU required: torch already installed in base image, skipping")
-        # Remove torch from packages list since it's in the base image
-        packages = [pkg for pkg in packages if pkg != 'torch']
-
-    if not packages:
-        logger.info("No additional packages to install")
-        return
-
+        
     logger.info(f"Installing {len(packages)} additional packages to overlay")
-
-    # Create site-packages directory in overlay
-    overlay_site_packages = os.path.join(overlay_dir, "lib", "python3.11", "site-packages")
-    os.makedirs(overlay_site_packages, exist_ok=True)
 
     install_cmd = [
         "singularity", "exec",
-        "--bind", f"{overlay_dir}:/overlay:rw",
+        "--overlay", overlay_dir,
         singularity_image,
         "bash", "-lc",
-        f"python3 -m pip install --target /overlay/lib/python3.11/site-packages {' '.join(packages)}"
+        f"python3 -m pip install {' '.join(packages)}"
     ]
 
     try:
@@ -89,10 +76,10 @@ def _install_packages_individually(
     for pkg in packages:
         install_cmd = [
             "singularity", "exec",
-            "--bind", f"{overlay_dir}:/overlay:rw",
+            "--overlay", overlay_dir,
             singularity_image,
             "bash", "-lc",
-            f'python3 -m pip install --target /overlay/lib/python3.11/site-packages "{pkg}"'
+            f'python3 -m pip install "{pkg}"'
         ]
 
         try:
