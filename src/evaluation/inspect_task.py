@@ -4,7 +4,7 @@ import json
 import logging
 from inspect_ai import Task, task
 from inspect_ai.agent import react, agent
-from inspect_ai.tool import bash, python, think, tool_with
+from inspect_ai.tool import bash, python, think, tool_with, text_editor
 from inspect_ai.dataset import Sample
 from inspect_ai.solver import basic_agent, system_message
 from inspect_ai.agent import AgentPrompt
@@ -135,12 +135,17 @@ def react_agent(
         tools=[
             tool_with(
                 tool=python(timeout=timeout),
-                name="execute_python"
+                name="python"
             ),
             tool_with(
                 tool=bash(timeout=timeout),
-                name="execute_bash"
+                name="bash"
             ),
+            tool_with(
+                tool=text_editor(timeout=timeout),
+                name="text_editor"
+            ),
+
             think()
         ],
         attempts=attempts,
