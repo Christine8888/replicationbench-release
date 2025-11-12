@@ -49,13 +49,29 @@ def install_packages_in_overlay(
         logger.info("No packages to install")
         return
 
-    # Replace 'torch' with CUDA version if GPU is needed
     if needs_gpu and 'torch' in packages:
-        packages = [pkg if pkg != 'torch' else 'torch --index-url https://download.pytorch.org/whl/cu124'
-                   for pkg in packages]
         logger.info("GPU required: installing CUDA-enabled PyTorch (cu124)")
+        torch_cmd = [
+            "singularity", "exec",
+            "--overlay", overlay_dir,
+            singularity_image,
+            "bash", "-lc",
+            "python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu124"
+        ]
+        try:
+            result = subprocess.run(torch_cmd, check=True, capture_output=True, text=True)
+            logger.info(f"Successfully installed CUDA-enabled PyTorch: {result.stdout}")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to install CUDA PyTorch: {e.stderr}")
+            raise
 
-    logger.info(f"Installing {len(packages)} packages to overlay")
+        packages = [pkg for pkg in packages if pkg != 'torch']
+
+    if not packages:
+        logger.info("No additional packages to install")
+        return
+
+    logger.info(f"Installing {len(packages)} additional packages to overlay")
 
     install_cmd = [
         "singularity", "exec",
