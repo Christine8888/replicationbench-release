@@ -65,11 +65,11 @@ def paper(
             tools=[
                 tool_with(
                     tool=python(timeout=execution_timeout),
-                    name="execute_python"
+                    name="python"
                 ),
                 tool_with(
                     tool=bash(timeout=execution_timeout),
-                    name="execute_bash"
+                    name="bash"
                 ),
                 think()
             ],
@@ -121,7 +121,7 @@ def react_agent(
         ReAct agent
     """
     if not prompt:
-        prompt = "You are an expert at using code and shell execution to reproduce research papers."
+        prompt = "You are an expert at using code and shell execution to reproduce research papers. Remember that bash and Python states are ephemeral."
     assistant_prompt = "Always try again if you are stuck. DO NOT give up early or copy answers. DO NOT submit the task early unless the task is completed, impossible, or running out of tokens/time. NEVER guess values - just submit None for fields you cannot compute."
     agent_prompt = AgentPrompt(
         instructions=prompt,
@@ -141,11 +141,6 @@ def react_agent(
                 tool=bash(timeout=timeout),
                 name="bash"
             ),
-            tool_with(
-                tool=text_editor(timeout=timeout),
-                name="text_editor"
-            ),
-
             think()
         ],
         attempts=attempts,

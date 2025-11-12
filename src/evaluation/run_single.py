@@ -138,7 +138,6 @@ def main():
 
         for key, value in config.items():
             key_lower = key.lower()
-            # Override arg if it wasn't explicitly set on command line or doesn't exist
             if not hasattr(args, key_lower) or getattr(args, key_lower) is None:
                 setattr(args, key_lower, value)
 
@@ -155,7 +154,7 @@ def main():
     if args.mode is None:
         args.mode = "base"
     if args.display is None:
-        args.display = "full"
+        args.display = "conversation" # for better readability
 
     if hasattr(args, 'cache') and not args.no_cache:
         args.no_cache = not args.cache
