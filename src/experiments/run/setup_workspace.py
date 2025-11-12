@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--papers", nargs="+", help="Paper IDs to setup")
     parser.add_argument("--data_only", action="store_true", help="Only download data")
     parser.add_argument("--deps_only", action="store_true", help="Only install dependencies")
+    parser.add_argument("--nobatch", action="store_true", help="Skip batch install, install packages one by one")
     parser.add_argument("--task_types", nargs="+", help="Task types filter")
     parser.add_argument("--filter_source", help="Restrict only to specified source (e.g., showyourwork)")
     args = parser.parse_args()
@@ -50,7 +51,8 @@ def main():
                 workspace_base=cluster_config.workspace_base,
                 singularity_image=cluster_config.singularity_image,
                 download_data=download_data,
-                install_deps=install_deps
+                install_deps=install_deps,
+                nobatch=args.nobatch
             )
             logger.info(f"Successfully set up {paper_id}")
         except Exception as e:
