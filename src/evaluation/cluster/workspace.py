@@ -60,10 +60,10 @@ def install_packages_in_overlay(
     ]
 
     try:
-        subprocess.run(install_cmd, check=True, capture_output=True, text=True)
+        subprocess.run(install_cmd, check=True)
         logger.info("Successfully installed all packages")
     except subprocess.CalledProcessError as e:
-        logger.warning(f"Batch install failed: {e.stderr}")
+        logger.warning(f"Batch install failed")
         _install_packages_individually(packages, overlay_dir, singularity_image)
 
 
@@ -83,10 +83,10 @@ def _install_packages_individually(
         ]
 
         try:
-            subprocess.run(install_cmd, check=True, capture_output=True, text=True)
+            subprocess.run(install_cmd, check=True)
             logger.info(f"Successfully installed {pkg}")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Could not install {pkg}: {e.stderr}")
+            logger.error(f"Could not install {pkg}")
 
 
 def prepare_workspace_for_evaluation(

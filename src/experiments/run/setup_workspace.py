@@ -52,9 +52,9 @@ def main():
                 download_data=download_data,
                 install_deps=install_deps
             )
-            logger.info(f"Successfully setup {paper_id}")
+            logger.info(f"Successfully set up {paper_id}")
         except Exception as e:
-            logger.error(f"Failed to setup {paper_id}: {e}")
+            logger.error(f"Failed to set up {paper_id}: {e}")
 
     logger.info("Workspace setup complete")
 
