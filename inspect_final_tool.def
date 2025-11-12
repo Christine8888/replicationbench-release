@@ -1,12 +1,9 @@
 Bootstrap: docker
-From: nvidia/cuda:12.6.0-base-ubuntu24.04
+From: python:3.11-slim
 
 %post
-    # Update and install basic tools (Ubuntu 24.04 has Python 3.12 by default)
+    # Update and install system dependencies
     apt-get update && apt-get install -y \
-        python3 \
-        python3-pip \
-        python3-dev \
         build-essential \
         gcc \
         g++ \
@@ -31,7 +28,6 @@ From: nvidia/cuda:12.6.0-base-ubuntu24.04
         scikit-image \
         seaborn \
         datasets \
-        wget \
         plotly \
         sympy \
         networkx \
@@ -43,7 +39,7 @@ From: nvidia/cuda:12.6.0-base-ubuntu24.04
         requests \
         filelock
 
-    # Install PyTorch with CUDA 12.6 support
+    # Install PyTorch with CUDA 12.6 support (includes CUDA runtime libs)
     python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu126
 
     # Install inspect-ai
@@ -59,7 +55,6 @@ From: nvidia/cuda:12.6.0-base-ubuntu24.04
 %environment
     export LC_ALL=C
     export PATH=/usr/local/bin:$PATH
-    export PYTHONPATH=/usr/local/lib/python3.12/site-packages:$PYTHONPATH
 
 %runscript
     exec "$@"
@@ -71,12 +66,14 @@ From: nvidia/cuda:12.6.0-base-ubuntu24.04
 
 %help
     This container provides:
-    - Python 3.12 (Ubuntu 24.04 default)
+    - Python 3.11
     - Scientific Python stack (numpy, scipy, matplotlib, astropy, etc.)
-    - PyTorch with CUDA 12.6 support
+    - PyTorch with CUDA 12.6 support (includes CUDA runtime libraries)
     - Inspect AI framework
-    - C/C++ compilers (gcc, g++)
+    - C/C++ compilers (gcc, g++, gfortran)
 
     Usage:
         singularity exec image.sif python3 script.py
         singularity exec --nv image.sif python3 gpu_script.py  # with GPU support
+
+    The --nv flag exposes host CUDA drivers for GPU acceleration.
