@@ -134,7 +134,7 @@ def get_executor_instructions(executor) -> str:
     out += "You have access to tools for code/bash execution.\n"
 
     if executor.needs_gpu:
-        out += "You will need and will have access to one or multiple GPUs for this task. You can access GPU resources directly through your code or shell execution for any tasks.\n"
+        out += "You will need and will have access to one or multiple GPUs for this task. You can access GPU resources directly through your code or shell execution for any tasks. You should run nvidia-smi to see your GPU resources.\n"
 
     languages = ', '.join(executor.code_language) if isinstance(executor.code_language, list) else executor.code_language
     out += f"You will be able to execute code in the following programming language(s): {languages}\n"
