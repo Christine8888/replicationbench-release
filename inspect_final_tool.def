@@ -25,6 +25,8 @@ From: python:3.11-slim
         pandas \
         astropy \
         scikit-learn \
+        anthropic \
+        openai \
         scikit-image \
         seaborn \
         datasets \
