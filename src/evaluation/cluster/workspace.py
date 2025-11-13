@@ -73,7 +73,7 @@ def install_packages_in_overlay(
         "--overlay", overlay_dir,
         singularity_image,
         "bash", "-lc",
-        f"python3 -m pip install {' '.join(packages)}"
+        f"export PYTHONUSERBASE=/usr/local && python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
     ]
 
     try:
@@ -90,13 +90,14 @@ def _install_packages_individually(
     singularity_image: str
 ) -> None:
     """Install packages one at a time."""
+    failed_packages = []
     for pkg in packages:
         install_cmd = [
             "singularity", "exec",
             "--overlay", overlay_dir,
             singularity_image,
             "bash", "-lc",
-            f'python3 -m pip install "{pkg}"'
+            f'export PYTHONUSERBASE=/usr/local && python3 -m pip install --user --no-build-isolation "{pkg}"'
         ]
 
         try:
@@ -104,6 +105,10 @@ def _install_packages_individually(
             logger.info(f"Successfully installed {pkg}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Could not install {pkg}: {e.stderr}")
+            failed_packages.append(pkg)
+
+    if failed_packages:
+        raise RuntimeError(f"Failed to install {len(failed_packages)} package(s): {', '.join(failed_packages)}")
 
 
 def prepare_workspace_for_evaluation(

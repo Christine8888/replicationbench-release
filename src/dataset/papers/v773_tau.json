@@ -37,6 +37,7 @@
     ],
     "dependencies": [
       "numpy",
+      "cython",
       "scipy",
       "emcee",
       "matplotlib",
