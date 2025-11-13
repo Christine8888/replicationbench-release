@@ -14,6 +14,12 @@ from evaluation.cluster.slurm import get_slurm_executor
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Memory configuration for papers requiring more memory
+MEMORY_CONFIG = {
+    "fable_mps": 256,
+    "tng_hod": 256,
+}
+
 
 def has_existing_eval(paper_id: str, log_dir: str) -> Path | None:
     """Check if paper already has an eval file in the log directory.
@@ -186,26 +192,9 @@ def main():
         logger.info("No papers to run - all have existing eval files")
         return
 
-    cpu_executor = get_slurm_executor(
-        log_dir=slurm_log_dir,
-        partition=cluster_config.cpu_partition,
-        time_hours=cluster_config.time_hours,
-        cpus_per_task=cluster_config.cpus_per_task,
-        mem_gb=cluster_config.mem_gb,
-        job_name=f"{exp_config['RUN_NAME']}_cpu",
-        array_parallelism=cluster_config.n_parallel
-    )
-
-    gpu_executor = get_slurm_executor(
-        log_dir=slurm_log_dir,
-        partition=cluster_config.gpu_partition,
-        time_hours=cluster_config.time_hours,
-        cpus_per_task=cluster_config.cpus_per_task,
-        mem_gb=cluster_config.mem_gb,
-        job_name=f"{exp_config['RUN_NAME']}_gpu",
-        array_parallelism=cluster_config.n_parallel,
-        enable_gpu=True
-    )
+    # Group papers by (needs_gpu, mem_gb) to create appropriate executors
+    from collections import defaultdict
+    paper_groups = defaultdict(list)
 
     for paper_id in paper_ids:
         paper = loader.papers[paper_id]
@@ -213,22 +202,49 @@ def main():
             paper.execution_requirements and
             paper.execution_requirements.needs_gpu
         )
+        # Get paper-specific memory, defaulting to cluster config
+        mem_gb = MEMORY_CONFIG.get(paper_id, cluster_config.mem_gb)
+        paper_groups[(needs_gpu, mem_gb)].append(paper_id)
 
-        executor = gpu_executor if needs_gpu else cpu_executor
+    logger.info(f"Paper groupings by resource requirements:")
+    for (needs_gpu, mem_gb), papers in paper_groups.items():
+        logger.info(f"  GPU={needs_gpu}, Memory={mem_gb}GB: {len(papers)} papers")
 
-        with executor.batch():
-            job = executor.submit(
-                run_paper_job,
-                paper_id,
-                args.config,
-                cluster_config,
-                exp_config["RUN_NAME"],
-                needs_gpu
-            )
-            logger.info(f"Submitted job for {paper_id}")
+    # Create executors and submit jobs for each group
+    for (needs_gpu, mem_gb), group_papers in paper_groups.items():
+        # Use highmem partition for high memory jobs (> 128GB), otherwise GPU or CPU partition
+        if mem_gb > 128:
+            partition = cluster_config.highmem_partition
+        elif needs_gpu:
+            partition = cluster_config.gpu_partition
+        else:
+            partition = cluster_config.cpu_partition
+
+        executor = get_slurm_executor(
+            log_dir=slurm_log_dir,
+            partition=partition,
+            time_hours=cluster_config.time_hours,
+            cpus_per_task=cluster_config.cpus_per_task,
+            mem_gb=mem_gb,
+            job_name=exp_config['RUN_NAME'],
+            array_parallelism=cluster_config.n_parallel,
+            enable_gpu=needs_gpu
+        )
+
+        for paper_id in group_papers:
+            with executor.batch():
+                job = executor.submit(
+                    run_paper_job,
+                    paper_id,
+                    args.config,
+                    cluster_config,
+                    exp_config["RUN_NAME"],
+                    needs_gpu
+                )
+                logger.info(f"Submitted job for {paper_id} (Partition={partition}, GPU={needs_gpu}, Memory={mem_gb}GB)")
 
     logger.info(f"All {len(paper_ids)} jobs submitted to Slurm")
-    logger.info(f"Maximum {cluster_config.n_parallel} jobs will run concurrently in each partition (CPU or GPU)")
+    logger.info(f"Maximum {cluster_config.n_parallel} jobs will run concurrently per executor group")
 
 
 if __name__ == "__main__":
