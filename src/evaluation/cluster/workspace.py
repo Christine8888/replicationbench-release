@@ -73,7 +73,7 @@ def install_packages_in_overlay(
         "--overlay", overlay_dir,
         singularity_image,
         "bash", "-lc",
-        f"export PYTHONUSERBASE=/usr/local && python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
+        f"python3 -m pip install --no-build-isolation {' '.join(packages)}"
     ]
 
     try:
@@ -97,7 +97,7 @@ def _install_packages_individually(
             "--overlay", overlay_dir,
             singularity_image,
             "bash", "-lc",
-            f'export PYTHONUSERBASE=/usr/local && python3 -m pip install --user --no-build-isolation "{pkg}"'
+            f'python3 -m pip install --no-build-isolation "{pkg}"'
         ]
 
         try:
