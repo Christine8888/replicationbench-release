@@ -39,7 +39,6 @@
       "corner",
       "astropy",
       "lalsuite",
-      "lalsimulation",
       "h5py",
       "pesummary"
     ]

@@ -71,6 +71,10 @@ def paper(
                     tool=bash(timeout=execution_timeout),
                     name="bash"
                 ),
+                tool_with(
+                    tool=text_editor(timeout=execution_timeout),
+                    name="text_editor"
+                ),
                 think()
             ],
             max_attempts=attempts,
@@ -140,6 +144,10 @@ def react_agent(
             tool_with(
                 tool=bash(timeout=timeout),
                 name="bash"
+            ),
+            tool_with(
+                tool=text_editor(timeout=timeout),
+                name="text_editor"
             ),
             think()
         ],
