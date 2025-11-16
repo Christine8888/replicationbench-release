@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 # Memory configuration for papers requiring more memory
 MEMORY_CONFIG = {
     "fable_mps": 256,
-    "tng_hod": 256,
 }
 
 
