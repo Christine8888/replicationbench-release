@@ -29,7 +29,7 @@
     "code_language": [
       "python"
     ],
-    "dependencies": []
+    "dependencies": ["illustris_python"]
   },
   "source": "expert",
   "other_instructions": null

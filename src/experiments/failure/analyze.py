@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import tiktoken
-from inspect_ai.model import get_model, GenerateConfig, Model
+from inspect_ai.model import get_model, GenerateConfig, Model, ChatMessageUser
 
 from experiments.utils.log_reader import (
     read_eval_log_safe,
@@ -100,18 +100,66 @@ def parse_response(response: str, expected_tags: List[str]) -> Dict[str, str]:
     return parsed
 
 
+def extract_text_from_response(response) -> Optional[str]:
+    """Extract text from response object, handling various formats."""
+    try:
+        content = response.choices[0].message.content
+
+        if isinstance(content, str):
+            return content
+
+        if isinstance(content, list):
+            if not content:
+                logger.warning(f"Empty list in response content. Full response: {response}")
+                return None
+
+            full_text = ""
+            for item in content:
+                if hasattr(item, 'text'):
+                    full_text += item.text + "\n"
+                elif hasattr(item, 'content'):
+                    full_text += str(item.content) + "\n"
+                elif hasattr(item, 'reasoning'):
+                    full_text += f"<reasoning>\n{item.reasoning}\n</reasoning>\n"
+                else:
+                    logger.warning(f"Unrecognized list item format. Full response: {response}")
+                    logger.warning(f"List item type: {type(item)}, attributes: {dir(item)}")
+                    return None
+            return full_text
+
+        logger.warning(f"Unexpected response content type: {type(content)}. Full response: {response}")
+        return None
+
+    except (IndexError, AttributeError) as e:
+        logger.warning(f"Error accessing response: {e}. Full response: {response}")
+        return None
+    except Exception as e:
+        logger.warning(f"Unexpected exception extracting text: {e}. Full response: {response}")
+        return None
+
+
 async def analyze_with_prompt(
-    model: Model,
+    model_client,
     prompt: str,
     expected_tags: List[str],
     config: GenerateConfig
 ) -> Tuple[str, Dict[str, str]]:
     """Send prompt to LLM and parse response."""
-    messages = [{"role": "user", "content": prompt}]
+    messages = [ChatMessageUser(content=prompt)]
 
     try:
-        response = await model.generate(messages, config=config)
-        completion = response.completion
+        # Use the already-initialized model client
+        response = await model_client.generate(
+            input=messages,
+            config=config
+        )
+
+        # Extract text from response using the helper function
+        completion = extract_text_from_response(response)
+
+        if completion is None:
+            logger.error("Failed to extract text from response")
+            return "", {tag: "Error: Failed to extract response text" for tag in expected_tags}
 
         parsed = parse_response(completion, expected_tags)
 
@@ -123,7 +171,7 @@ async def analyze_with_prompt(
 
 
 async def analyze_transcript(
-    model: Model,
+    model_client,
     eval_log,
     log_file: str,
     prompt_template: str,
@@ -163,7 +211,7 @@ async def analyze_transcript(
             )
 
             completion, parsed = await analyze_with_prompt(
-                model, prompt, expected_tags, config
+                model_client, prompt, expected_tags, config
             )
 
             all_responses.append(completion)
@@ -207,7 +255,7 @@ async def analyze_transcript(
 
 
 async def analyze_from_jsonl(
-    model: Model,
+    model_client,
     input_file: str,
     prompt_template: str,
     expected_tags: List[str],
@@ -269,45 +317,52 @@ async def analyze_directory(
         )
     )
 
-    if os.path.isfile(log_dir) and log_dir.endswith('.jsonl'):
-        logger.info(f"Input is JSONL file, analyzing items directly")
-        analyses = await analyze_from_jsonl(
-            model, log_dir, prompt_template, expected_tags,
-            GenerateConfig(temperature=temperature, max_tokens=max_tokens)
-        )
-        valid_analyses = analyses
-    else:
-        eval_files = glob.glob(os.path.join(log_dir, "*.eval"))
+    # Initialize the model client
+    model_client = await model.__aenter__()
 
-        if not eval_files:
-            logger.warning(f"No .eval files found in {log_dir}")
-            return []
+    try:
+        if os.path.isfile(log_dir) and log_dir.endswith('.jsonl'):
+            logger.info(f"Input is JSONL file, analyzing items directly")
+            analyses = await analyze_from_jsonl(
+                model_client, log_dir, prompt_template, expected_tags,
+                GenerateConfig(temperature=temperature, max_tokens=max_tokens)
+            )
+            valid_analyses = analyses
+        else:
+            eval_files = glob.glob(os.path.join(log_dir, "*.eval"))
 
-        logger.info(f"Found {len(eval_files)} eval files to analyze")
+            if not eval_files:
+                logger.warning(f"No .eval files found in {log_dir}")
+                return []
 
-        valid_analyses = []
-        for i in range(0, len(eval_files), max_concurrent):
-            batch = eval_files[i:i+max_concurrent]
-            tasks = []
+            logger.info(f"Found {len(eval_files)} eval files to analyze")
 
-            for log_file in batch:
-                eval_log = read_eval_log_safe(log_file)
-                if eval_log:
-                    tasks.append(
-                        analyze_transcript(
-                            model,
-                            eval_log,
-                            log_file,
-                            prompt_template,
-                            expected_tags,
-                            GenerateConfig(temperature=temperature, max_tokens=max_tokens),
-                            max_tokens_per_segment
+            valid_analyses = []
+            for i in range(0, len(eval_files), max_concurrent):
+                batch = eval_files[i:i+max_concurrent]
+                tasks = []
+
+                for log_file in batch:
+                    eval_log = read_eval_log_safe(log_file)
+                    if eval_log:
+                        tasks.append(
+                            analyze_transcript(
+                                model_client,
+                                eval_log,
+                                log_file,
+                                prompt_template,
+                                expected_tags,
+                                GenerateConfig(temperature=temperature, max_tokens=max_tokens),
+                                max_tokens_per_segment
+                            )
                         )
-                    )
 
-            results = await asyncio.gather(*tasks)
-            valid_analyses.extend([r for r in results if r])
-            logger.info(f"Processed {min(i+max_concurrent, len(eval_files))}/{len(eval_files)} files")
+                results = await asyncio.gather(*tasks)
+                valid_analyses.extend([r for r in results if r])
+                logger.info(f"Processed {min(i+max_concurrent, len(eval_files))}/{len(eval_files)} files")
+    finally:
+        # Clean up the model client
+        await model.__aexit__(None, None, None)
 
     logger.info(f"Successfully analyzed {len(valid_analyses)} items")
 

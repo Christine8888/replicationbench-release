@@ -2,22 +2,20 @@ Bootstrap: docker
 From: python:3.11-slim
 
 %post
-    # Update and install system dependencies
     apt-get update && apt-get install -y \
         build-essential \
         gcc \
         g++ \
         gfortran \
+        libgsl-dev \
         git \
         curl \
         wget \
         vim \
         && rm -rf /var/lib/apt/lists/*
 
-    # Upgrade pip
     python3 -m pip install --upgrade pip setuptools wheel
 
-    # Install scientific Python packages
     python3 -m pip install \
         numpy \
         scipy \
@@ -41,13 +39,10 @@ From: python:3.11-slim
         requests \
         filelock
 
-    # Install PyTorch with CUDA 12.6 support (includes CUDA runtime libs)
     python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu126
 
-    # Install inspect-ai
     python3 -m pip install inspect-ai
 
-    # Install additional useful tools
     python3 -m pip install \
         jupyter \
         ipython \
@@ -73,6 +68,7 @@ From: python:3.11-slim
     - PyTorch with CUDA 12.6 support (includes CUDA runtime libraries)
     - Inspect AI framework
     - C/C++ compilers (gcc, g++, gfortran)
+    - GNU Scientific Library (GSL)
 
     Usage:
         singularity exec image.sif python3 script.py

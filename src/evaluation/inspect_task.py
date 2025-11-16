@@ -4,6 +4,7 @@ import json
 import logging
 from inspect_ai import Task, task
 from inspect_ai.agent import react, agent
+from inspect_ai.model import GenerateConfig
 from inspect_ai.tool import bash, python, think, tool_with, text_editor
 from inspect_ai.dataset import Sample
 from inspect_ai.solver import basic_agent, system_message
@@ -25,7 +26,8 @@ def paper(
     time_limit: int = 12000,
     cache: bool = True,
     mode: str = "base",
-    include_workspace: bool = True
+    include_workspace: bool = True,
+    max_tool_output: int = 256 * 1024
 ):
     """Create Inspect task for a paper evaluation.
 
@@ -40,6 +42,7 @@ def paper(
         cache: Whether to use prompt caching
         mode: Agent mode ('base' or 'react')
         include_workspace: Alert agent that data is pre-downloaded
+        max_tool_output: Maximum tool output in bytes (default 256KB)
 
     Returns:
         Inspect AI Task object
@@ -84,12 +87,17 @@ def paper(
     expected_output = paper_obj.get_output()
     output_tolerance = paper_obj.get_output_tolerance()
 
+    generate_config = GenerateConfig(
+        max_tool_output=max_tool_output
+    )
+
     return Task(
         dataset=[Sample(
             input=paper_prompt,
             target=json.dumps(expected_output),
         )],
         solver=solver,
+        config=generate_config,
         message_limit=message_limit,
         token_limit=token_limit,
         time_limit=time_limit,

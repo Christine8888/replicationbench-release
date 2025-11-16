@@ -167,9 +167,7 @@ def main():
     )
 
     paper_ids = list(loader.papers.keys())
-    # NOTE: running without chandra_representation 
-    paper_ids = [p for p in paper_ids if p != "chandra_representation"]
-    
+
     total_tasks = sum(len(loader.papers[pid].tasks) for pid in paper_ids)
     logger.info(f"Found {len(paper_ids)} papers to process")
     logger.info(f"Total tasks to evaluate: {total_tasks}")
@@ -210,6 +208,9 @@ def main():
         logger.info(f"  GPU={needs_gpu}, Memory={mem_gb}GB: {len(papers)} papers")
 
     # Create executors and submit jobs for each group
+    from datetime import datetime
+    import submitit
+
     for (needs_gpu, mem_gb), group_papers in paper_groups.items():
         # Use highmem partition for high memory jobs (> 128GB), otherwise GPU or CPU partition
         if mem_gb > 128:
@@ -219,18 +220,33 @@ def main():
         else:
             partition = cluster_config.cpu_partition
 
-        executor = get_slurm_executor(
-            log_dir=slurm_log_dir,
-            partition=partition,
-            time_hours=cluster_config.time_hours,
-            cpus_per_task=cluster_config.cpus_per_task,
-            mem_gb=mem_gb,
-            job_name=exp_config['RUN_NAME'],
-            array_parallelism=cluster_config.n_parallel,
-            enable_gpu=needs_gpu
-        )
-
         for paper_id in group_papers:
+            # Create a separate executor for each paper with custom log names
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            executor = submitit.AutoExecutor(folder=slurm_log_dir)
+
+            slurm_kwargs = {
+                "timeout_min": cluster_config.time_hours * 60,
+                "nodes": 1,
+                "slurm_ntasks_per_node": 1,
+                "cpus_per_task": cluster_config.cpus_per_task,
+                "slurm_mem": f"{mem_gb}GB",
+                "slurm_job_name": f"{exp_config['RUN_NAME']}_{paper_id}",
+                "slurm_partition": partition,
+                "slurm_additional_parameters": {
+                    "output": os.path.join(slurm_log_dir, f"{paper_id}_{timestamp}.out"),
+                    "error": os.path.join(slurm_log_dir, f"{paper_id}_{timestamp}.err")
+                }
+            }
+
+            if cluster_config.n_parallel:
+                slurm_kwargs["slurm_array_parallelism"] = cluster_config.n_parallel
+
+            if needs_gpu:
+                slurm_kwargs["slurm_gres"] = "gpu:1"
+
+            executor.update_parameters(**slurm_kwargs)
+
             with executor.batch():
                 job = executor.submit(
                     run_paper_job,
