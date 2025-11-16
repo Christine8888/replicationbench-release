@@ -1,3 +1,5 @@
+slurm_logs/
+*.jsonl
 old_logs/
 *.sh
 *.DS_Store
