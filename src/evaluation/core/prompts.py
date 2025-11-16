@@ -137,8 +137,8 @@ def get_executor_instructions(executor) -> str:
         out += "You will need and will have access to one or multiple GPUs for this task. You can access GPU resources directly through your code or shell execution for any tasks. You should run nvidia-smi to see your GPU resources.\n"
 
     languages = ', '.join(executor.code_language) if isinstance(executor.code_language, list) else executor.code_language
-    out += f"You will be able to execute code in the following programming language(s): {languages}\n"
-    out += f"You will have access to the following Python packages: {', '.join(executor.dependencies)}\n"
+    out += f"You will be able to execute code in the following programming language(s): {languages}.\n"
+    out += f"You will have access to the following Python packages: {', '.join(executor.dependencies)}.\n"
     out += "These packages are pre-installed. You SHOULD NOT re-install them.\n"
     out += "You can download and install additional packages using 'python3 -m pip install --user <package>' if needed.\n"
 
@@ -269,6 +269,6 @@ def get_paper_prompt(paper, workspace: Optional[str] = None, include_workspace: 
         prompt += "- List the files in the workspace directory first to see what data is available\n"
 
     blank_output = paper.get_blank_output(fill=0)
-    prompt += f"\n\nExpected output format for the 'numeric' tasks as a JSON dictionary. The key for each field corresponds to the TASK_ID:\n{blank_output}\n"
+    prompt += f"\n\nHere is the expected output format as a JSON dictionary. The key for each field corresponds to the TASK_ID:\n{blank_output}\n"
 
     return prompt

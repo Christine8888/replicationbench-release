@@ -96,7 +96,7 @@ def run_paper_job(
     src_dir = Path(__file__).parent.parent.parent.absolute()
 
     bash_cmd = (
-        f"export PYTHONUSERBASE=/usr/local && "
+        f"export PYTHONUSERBASE=/tmp/.local && "
         f"export PYTHONPATH=/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
         f"export PATH=/usr/local/bin:/tmp/.local/bin:$PATH && "
         f"export HOME=/tmp && "
