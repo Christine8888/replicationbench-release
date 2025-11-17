@@ -223,7 +223,12 @@ def main():
         for paper_id in group_papers:
             # Create a separate executor for each paper with custom log names
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            executor = submitit.AutoExecutor(folder=slurm_log_dir)
+
+            # Create a paper-specific subfolder for cleaner organization
+            paper_log_dir = os.path.join(slurm_log_dir, f"{paper_id}_{timestamp}")
+            os.makedirs(paper_log_dir, exist_ok=True)
+
+            executor = submitit.AutoExecutor(folder=paper_log_dir)
 
             slurm_kwargs = {
                 "timeout_min": cluster_config.time_hours * 60,
@@ -233,10 +238,6 @@ def main():
                 "slurm_mem": f"{mem_gb}GB",
                 "slurm_job_name": f"{exp_config['RUN_NAME']}_{paper_id}",
                 "slurm_partition": partition,
-                "slurm_additional_parameters": {
-                    "output": os.path.join(slurm_log_dir, f"{paper_id}_{timestamp}.out"),
-                    "error": os.path.join(slurm_log_dir, f"{paper_id}_{timestamp}.err")
-                }
             }
 
             if cluster_config.n_parallel:
@@ -257,9 +258,11 @@ def main():
                     needs_gpu
                 )
                 logger.info(f"Submitted job for {paper_id} (Partition={partition}, GPU={needs_gpu}, Memory={mem_gb}GB)")
+                logger.info(f"  Logs will be in: {paper_log_dir}/")
 
     logger.info(f"All {len(paper_ids)} jobs submitted to Slurm")
     logger.info(f"Maximum {cluster_config.n_parallel} jobs will run concurrently per executor group")
+    logger.info(f"Logs are organized in paper-specific subdirectories within {slurm_log_dir}")
 
 
 if __name__ == "__main__":
