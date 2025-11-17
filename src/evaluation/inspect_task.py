@@ -111,9 +111,13 @@ def paper(
         name=paper_obj.paper_id,
         sandbox_env={
             "HOME": "/tmp",
+            "PYTHONUSERBASE": "/tmp/.local",
+            "PYTHONPATH": "/tmp/.local/lib/python3.11/site-packages",
+            "PATH": "/usr/local/bin:/tmp/.local/bin:/usr/bin:/bin",
             "GALPYRC": "/tmp/.galpyrc",
             "XDG_CONFIG_HOME": "/tmp/.config",
             "XDG_CACHE_HOME": "/tmp/.cache",
+            "MPLCONFIGDIR": "/tmp/.matplotlib",
         }
     )
 

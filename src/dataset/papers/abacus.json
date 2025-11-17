@@ -13,7 +13,7 @@
         "data_instructions": {"access": "All data will be produced as part of the execution of this paper."},
         "hf_name": ["ChristineYe8/abacus"],
         "hf_split": ["train"],
-        "hf_type": ["dataset"],
+        "hf_type": ["snapshot"],
         "hf_link": "https://huggingface.co/datasets/ChristineYe8/abacus"
     },
     "execution_requirements": {

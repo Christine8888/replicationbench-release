@@ -42,7 +42,7 @@ You have ample computational resources and execution time. Do not assume you do 
 
    Examples of CORRECT path usage:
    - Creating a file (relative path): "./utils.py"
-   - Reading data (absolute path): "/scratch/users/cye/workspace/muse_outflows/data.csv"
+   - Reading data (absolute path): "/workspace/data/observations.csv"
 
 4. Perform sanity checks on your intermediate calculations. For example:
    - If calculating stellar masses, verify they are within known physical ranges (e.g., 0.1-100 solar masses for main sequence stars)
