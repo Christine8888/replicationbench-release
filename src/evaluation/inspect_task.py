@@ -14,6 +14,22 @@ from evaluation.core.scorer import submission_file_scorer
 
 logger = logging.getLogger(__name__)
 
+def get_tools(execution_timeout: int = 6000):
+    return [
+        tool_with(
+            tool=python(timeout=execution_timeout),
+            name="python"
+        ),
+        tool_with(
+            tool=bash(timeout=execution_timeout),
+            name="bash"
+        ),
+        tool_with(
+            tool=text_editor(timeout=execution_timeout),
+            name="text_editor"
+        ),
+        think()
+    ]
 
 @task
 def paper(
@@ -27,7 +43,8 @@ def paper(
     cache: bool = True,
     mode: str = "base",
     include_workspace: bool = True,
-    max_tool_output: int = 256 * 1024
+    max_tool_output: int = 256 * 1024,
+    sandbox: str = "local"
 ):
     """Create Inspect task for a paper evaluation.
 
@@ -43,6 +60,7 @@ def paper(
         mode: Agent mode ('base' or 'react')
         include_workspace: Alert agent that data is pre-downloaded
         max_tool_output: Maximum tool output in bytes (default 256KB)
+        sandbox: Sandbox environment ("local" or "docker")
 
     Returns:
         Inspect AI Task object
@@ -65,21 +83,7 @@ def paper(
     else:
         solver = basic_agent(
             init=system_message(system_prompt_with_submission),
-            tools=[
-                tool_with(
-                    tool=python(timeout=execution_timeout),
-                    name="python"
-                ),
-                tool_with(
-                    tool=bash(timeout=execution_timeout),
-                    name="bash"
-                ),
-                tool_with(
-                    tool=text_editor(timeout=execution_timeout),
-                    name="text_editor"
-                ),
-                think()
-            ],
+            tools=get_tools(execution_timeout),
             max_attempts=attempts,
             cache=cache
         )
@@ -101,7 +105,7 @@ def paper(
         message_limit=message_limit,
         token_limit=token_limit,
         time_limit=time_limit,
-        sandbox="local",
+        sandbox=sandbox,
         scorer=submission_file_scorer(output_tolerance),
         attempts=attempts,
         name=paper_obj.paper_id,
@@ -144,20 +148,6 @@ def react_agent(
         name="researcher",
         description="Expert astrophysics researcher",
         prompt=agent_prompt,
-        tools=[
-            tool_with(
-                tool=python(timeout=timeout),
-                name="python"
-            ),
-            tool_with(
-                tool=bash(timeout=timeout),
-                name="bash"
-            ),
-            tool_with(
-                tool=text_editor(timeout=timeout),
-                name="text_editor"
-            ),
-            think()
-        ],
+        tools=get_tools(timeout),
         attempts=attempts,
     )

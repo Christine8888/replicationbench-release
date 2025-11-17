@@ -37,7 +37,7 @@ RUN python3 -m pip install \
     requests \
     filelock
 
-RUN python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu126 tensorflow
+RUN python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu126
 
 RUN python3 -m pip install inspect-ai
 
