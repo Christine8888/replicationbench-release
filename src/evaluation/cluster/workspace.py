@@ -69,9 +69,10 @@ def install_packages_in_overlay(
     install_cmd = [
         "singularity", "exec",
         "--overlay", overlay_dir,
+        "--bind", f"{overlay_dir}:{overlay_dir}:rw",
         singularity_image,
         "bash", "-lc",
-        f"python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
+        f"PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
     ]
 
     try:
@@ -93,9 +94,10 @@ def _install_packages_individually(
         install_cmd = [
             "singularity", "exec",
             "--overlay", overlay_dir,
+            "--bind", f"{overlay_dir}:{overlay_dir}:rw",
             singularity_image,
             "bash", "-lc",
-            f'python3 -m pip install --user --no-build-isolation "{pkg}"'
+            f'PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation "{pkg}"'
         ]
 
         try:

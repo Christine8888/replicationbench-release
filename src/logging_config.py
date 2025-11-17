@@ -1,4 +1,4 @@
-"""Unified logging configuration for ResearchBench."""
+"""Unified logging configuration for ReplicationBench."""
 
 import logging
 import sys
@@ -10,7 +10,7 @@ def setup_logger(
     level: int = logging.INFO,
     format_string: Optional[str] = None
 ) -> logging.Logger:
-    """Configure logger for ResearchBench modules.
+    """Configure logger for ReplicationBench modules.
 
     Args:
         name: Logger name (typically __name__)

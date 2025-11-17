@@ -1,6 +1,6 @@
-# ResearchBench Cluster Execution
+# ReplicationBench Cluster Execution
 
-This directory contains scripts for running ResearchBench evaluations on your cluster with Singularity and Slurm.
+This directory contains scripts for running ReplicationBench evaluations on your cluster with Singularity and Slurm.
 
 ## Setup
 

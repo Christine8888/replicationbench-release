@@ -1,1 +1,1 @@
-"""ResearchBench source package."""
+"""ReplicationBench experiments, miscellaneous."""
