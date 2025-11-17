@@ -59,7 +59,7 @@ def install_packages_in_overlay(
         logger.info("No additional packages to install")
         return
 
-    logger.info(f"Installing {len(packages)} additional packages to overlay")
+    logger.info(f"Installing {len(packages)} additional packages to overlay: {', '.join(packages)}")
 
     if nobatch:
         logger.info("--nobatch flag set, installing packages individually")
