@@ -43,7 +43,7 @@ def paper(
     cache: bool = True,
     mode: str = "base",
     include_workspace: bool = True,
-    max_tool_output: int = 256 * 1024,
+    max_tool_output: int = 16 * 1024,
     sandbox: str = "local"
 ):
     """Create Inspect task for a paper evaluation.

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Verify overlay package installation and visibility
 
-PAPER_ID="hubble_trails"  # Change as needed
+PAPER_ID="MUSE_outflows"  # Change as needed
 WORKSPACE_BASE="/oak/stanford/projects/c4u/researchbench/workspace"
 SINGULARITY_IMAGE="/oak/stanford/projects/c4u/researchbench/workspace/inspect_final_tool.sif"
 OVERLAY_PATH="$WORKSPACE_BASE/$PAPER_ID/overlay"
@@ -36,8 +36,8 @@ print()
 print(\"Checking for overlay packages:\")
 try:
     # Try importing a package you know is in overlay
-    import tensorflow  # or whatever package you installed
-    print(f\"  tensorflow found at: {tensorflow.__file__}\")
+    import vorbin  # or whatever package you installed
+    print(f\"  vorbin found at: {vorbin.__file__}\")
 except ImportError as e:
     print(f\"  tensorflow not found: {e}\")
 '
