@@ -86,7 +86,7 @@ You can load the dataset from HuggingFace into native ReplicationBench format us
 
 ## Citation
 
-If you use ResearchBench in your research, please cite:
+If you use ReplicationBench in your research, please cite:
 
 ```bibtex
 @misc{ye2025replicationbenchaiagentsreplicate,

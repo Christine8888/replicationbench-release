@@ -1,4 +1,4 @@
-"""ResearchBench evaluation module."""
+"""ReplicationBench evaluation module."""
 
 from logging_config import setup_logger
 

@@ -1,4 +1,4 @@
-"""Push ResearchBench dataset to HuggingFace."""
+"""Push ReplicationBench dataset to HuggingFace."""
 
 import sys
 from pathlib import Path

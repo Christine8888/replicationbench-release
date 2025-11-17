@@ -1,4 +1,4 @@
-"""Example script to load ResearchBench from HuggingFace and convert to Dataloader format."""
+"""Example script to load ReplicationBench from HuggingFace and convert to Dataloader format."""
 
 import json
 import sys
@@ -9,7 +9,7 @@ from dataset.dataloader import Dataloader
 
 
 def load_from_huggingface(dataset_name="ChristineYe8/replicationbench"):
-    """Load ResearchBench from HuggingFace and convert to Dataloader format.
+    """Load ReplicationBench from HuggingFace and convert to Dataloader format.
 
     Args:
         dataset_name: HuggingFace dataset name
