@@ -101,6 +101,11 @@ def run_paper_job(
     if model and model in ["openai/o3", "openai/o4-mini"]:
         tool_name_args = "--python_name python_execute --bash_name bash_execute"
 
+    # Runtime install for google-genai if needed for Gemini models
+    runtime_install = ""
+    if model and model.startswith("google/gemini"):
+        runtime_install = "python3 -m pip install --user google-genai && "
+
     bash_cmd = (
         f"export PYTHONUSERBASE=/tmp/.local && "
         f"export PYTHONPATH={overlay_path}/lib/python3.11/site-packages:/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
@@ -113,6 +118,7 @@ def run_paper_job(
         f"source {cluster_config.api_key_path} && "
         f"cd {os.getcwd()} && "
         f"mkdir -p /tmp/inspect_ai && "
+        f"{runtime_install}"
         f"python3 -m evaluation.run_single "
         f"--paper_id {paper_id} "
         f"--config {config_path} "
