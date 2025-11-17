@@ -29,7 +29,7 @@
     "code_language": [
       "python"
     ],
-    "dependencies": ["illustris_python", "asdf", "numpy"]
+    "dependencies": ["git+https://github.com/illustristng/illustris_python.git", "asdf", "numpy"]
   },
   "source": "expert",
   "other_instructions": null
