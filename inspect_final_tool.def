@@ -39,7 +39,7 @@ From: python:3.11-slim
         requests \
         filelock
 
-    python3 -m pip install torch --index-url https://download.pytorch.org/whl/cu126
+    python3 -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
     python3 -m pip install inspect-ai
 
