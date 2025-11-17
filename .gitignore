@@ -1,4 +1,3 @@
-!verify_overlay_setup.sh
 workspace/
 docker/
 .claude/
@@ -14,3 +13,5 @@ old_logs/
 !PR_INSTRUCTIONS.md
 __pycache__/
 *.pyc
+
+!verify_overlay_setup.sh
