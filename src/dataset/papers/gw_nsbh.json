@@ -21,7 +21,7 @@
       "train"
     ],
     "hf_type": [
-      "dataset"
+      "snapshot"
     ],
     "hf_link": "https://huggingface.co/datasets/ChristineYe8/gw_nsbh"
   },

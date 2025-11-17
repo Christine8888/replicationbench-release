@@ -105,6 +105,7 @@ def run_single_evaluation(
 
 
 def main():
+    """CLI args are only for *overriding* config file values, not for setting defaults"""
     parser = argparse.ArgumentParser(description="Run single paper evaluation")
 
     parser.add_argument("--paper_id", "-p", required=True, help="Paper ID to evaluate")

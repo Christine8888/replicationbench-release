@@ -41,7 +41,7 @@ def generate_paper_dockerfile(paper) -> str:
     if additional_deps:
         dockerfile += f"RUN python3 -m pip install --no-cache-dir {' '.join(additional_deps)}\n\n"
 
-    dockerfile += "WORKDIR /workspace\n"
+    dockerfile += "WORKDIR /tmp\n"
 
     return dockerfile
 
@@ -52,8 +52,8 @@ def generate_compose_file(paper_id: str, needs_gpu: bool = False) -> str:
   default:
     image: replicationbench:{paper_id}
     volumes:
-      - ./workspace:/workspace:rw
-    working_dir: /workspace
+      - ../../workspace/{paper_id}:/workspace:ro
+    working_dir: /tmp
     command: "tail -f /dev/null"
     init: true
     network_mode: host
