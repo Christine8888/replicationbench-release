@@ -97,8 +97,8 @@ def run_paper_job(
 
     bash_cmd = (
         f"export PYTHONUSERBASE=/tmp/.local && "
-        f"export PYTHONPATH=/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
-        f"export PATH=/usr/local/bin:/tmp/.local/bin:$PATH && "
+        f"export PYTHONPATH={overlay_path}/lib/python3.11/site-packages:/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
+        f"export PATH=/usr/local/bin:{overlay_path}/bin:/tmp/.local/bin:$PATH && "
         f"export HOME=/tmp && "
         f"export GALPYRC=/tmp/.galpyrc && "
         f"export XDG_CONFIG_HOME=/tmp/.config && "
