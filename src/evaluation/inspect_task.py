@@ -14,15 +14,15 @@ from evaluation.core.scorer import submission_file_scorer
 
 logger = logging.getLogger(__name__)
 
-def get_tools(execution_timeout: int = 6000):
+def get_tools(execution_timeout: int = 6000, python_name: str="python", bash_name: str="bash"):
     return [
         tool_with(
             tool=python(timeout=execution_timeout),
-            name="python"
+            name=python_name
         ),
         tool_with(
             tool=bash(timeout=execution_timeout),
-            name="bash"
+            name=bash_name
         ),
         tool_with(
             tool=text_editor(timeout=execution_timeout),
@@ -44,7 +44,9 @@ def paper(
     mode: str = "base",
     include_workspace: bool = True,
     max_tool_output: int = 256 * 1024,
-    sandbox: str = "local"
+    sandbox: str = "local",
+    python_name: str = "python",
+    bash_name: str = "bash"
 ):
     """Create Inspect task for a paper evaluation.
 
@@ -78,12 +80,14 @@ def paper(
             prompt=system_prompt_with_submission,
             attempts=attempts,
             timeout=execution_timeout,
-            cache=cache
+            cache=cache,
+            python_name=python_name,
+            bash_name=bash_name
         )
     else:
         solver = basic_agent(
             init=system_message(system_prompt_with_submission),
-            tools=get_tools(execution_timeout),
+            tools=get_tools(execution_timeout, python_name, bash_name),
             max_attempts=attempts,
             cache=cache
         )
@@ -127,7 +131,9 @@ def react_agent(
     prompt: str = None,
     attempts: int = 1,
     timeout: int = 6000,
-    cache: bool = True
+    cache: bool = True,
+    python_name: str = "python",
+    bash_name: str = "bash"
 ):
     """Set up a ReAct agent for reproducing research papers.
 
@@ -152,6 +158,6 @@ def react_agent(
         name="researcher",
         description="Expert astrophysics researcher",
         prompt=agent_prompt,
-        tools=get_tools(timeout),
+        tools=get_tools(timeout, python_name, bash_name),
         attempts=attempts,
     )
