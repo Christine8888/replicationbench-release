@@ -104,3 +104,46 @@ def setup_paper_environment(
         install_dependencies(dependencies, target_dir=deps_target)
 
     logger.info(f"Environment setup complete for {paper.paper_id}")
+
+
+def main():
+    """CLI interface for setting up paper data and environment.
+    Assumes that each paper has a unique directory, which is /path/to/workspace/{paper_id}"""
+    import argparse
+    from dataset.dataloader import Dataloader
+
+    parser = argparse.ArgumentParser(description="Setup paper data and environment")
+    parser.add_argument("--paper-id", "--paper_id", required=True, help="Paper ID to setup")
+    parser.add_argument("--workspace-base", "--workspace_base", required=True,
+                       help="Base workspace directory (paper-specific dir will be created inside)")
+    parser.add_argument("--data-only", "--data_only", action="store_true",
+                       help="Only download data, skip dependency installation")
+    parser.add_argument("--deps-only", "--deps_only", action="store_true",
+                       help="Only install dependencies, skip data download")
+    parser.add_argument("--deps-target", "--deps_target",
+                       help="Target directory for dependency installation")
+
+    args = parser.parse_args()
+
+    loader = Dataloader(paper_ids=[args.paper_id], load_text=False)
+    paper = loader.papers[args.paper_id]
+
+    paper_workspace = os.path.join(args.workspace_base, args.paper_id)
+    os.makedirs(paper_workspace, exist_ok=True)
+
+    download_data = not args.deps_only
+    install_deps = not args.data_only
+
+    setup_paper_environment(
+        paper=paper,
+        workspace_dir=paper_workspace,
+        download_data=download_data,
+        install_deps=install_deps,
+        deps_target=args.deps_target
+    )
+
+    print(f"Setup complete for {args.paper_id} in {paper_workspace}")
+
+
+if __name__ == "__main__":
+    main()

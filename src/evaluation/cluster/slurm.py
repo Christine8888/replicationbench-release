@@ -11,7 +11,7 @@ def get_slurm_executor(
     nodes: int = 1,
     cpus_per_task: int = 4,
     mem_gb: int = 128,
-    job_name: str = "researchbench",
+    job_name: str = "replicationbench",
     array_parallelism: Optional[int] = None,
     enable_gpu: bool = False
 ):

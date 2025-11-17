@@ -29,7 +29,8 @@ def run_single_evaluation(
     cache: bool = True,
     mode: str = "base",
     include_workspace: bool = True,
-    display: str = "full"
+    display: str = "full",
+    sandbox: str = "local"
 ) -> None:
     """Run evaluation for a single paper.
 
@@ -52,6 +53,7 @@ def run_single_evaluation(
         mode: Agent mode ('base' or 'react')
         include_workspace: Alert agent about pre-downloaded data
         display: Display mode for Inspect
+        sandbox: Sandbox environment ("local" or "docker")
     """
     logger.info(f"Running evaluation for paper: {paper_id}")
     os.makedirs(log_dir, exist_ok=True)
@@ -82,7 +84,8 @@ def run_single_evaluation(
         time_limit=time_limit,
         cache=cache,
         mode=mode,
-        include_workspace=include_workspace
+        include_workspace=include_workspace,
+        sandbox=sandbox
     )
 
     model_args = {}
@@ -126,6 +129,8 @@ def main():
     parser.add_argument("--mode", choices=["base", "react"], default=None)
     parser.add_argument("--no_workspace", action="store_true", help="Don't alert agent about workspace")
     parser.add_argument("--display", default=None)
+    parser.add_argument("--sandbox", choices=["local", "docker"], default="local",
+                        help="Sandbox environment (local or docker)")
 
     parser.add_argument("--config", help="JSON config file (overrides other args)")
 
@@ -184,7 +189,8 @@ def main():
         cache=not args.no_cache,
         mode=args.mode,
         include_workspace=not args.no_workspace,
-        display=args.display
+        display=args.display,
+        sandbox=args.sandbox
     )
 
 

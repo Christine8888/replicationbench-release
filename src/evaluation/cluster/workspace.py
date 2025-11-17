@@ -51,7 +51,6 @@ def install_packages_in_overlay(
         logger.info("No packages to install")
         return
 
-    # If GPU is needed and torch is in packages, skip it (already in base image)
     if needs_gpu and 'torch' in packages:
         logger.info("GPU required: torch already installed in base image, skipping")
         packages = [pkg for pkg in packages if pkg != 'torch']
@@ -62,7 +61,6 @@ def install_packages_in_overlay(
 
     logger.info(f"Installing {len(packages)} additional packages to overlay")
 
-    # Skip batch install if nobatch flag is set
     if nobatch:
         logger.info("--nobatch flag set, installing packages individually")
         _install_packages_individually(packages, overlay_dir, singularity_image)
