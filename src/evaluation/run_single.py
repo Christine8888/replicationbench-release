@@ -30,7 +30,9 @@ def run_single_evaluation(
     mode: str = "base",
     include_workspace: bool = True,
     display: str = "full",
-    sandbox: str = "local"
+    sandbox: str = "local",
+    python_name: str = "python",
+    bash_name: str = "bash"
 ) -> None:
     """Run evaluation for a single paper.
 
@@ -85,7 +87,9 @@ def run_single_evaluation(
         cache=cache,
         mode=mode,
         include_workspace=include_workspace,
-        sandbox=sandbox
+        sandbox=sandbox,
+        python_name=python_name,
+        bash_name=bash_name
     )
 
     model_args = {}
@@ -132,6 +136,9 @@ def main():
     parser.add_argument("--display", default=None)
     parser.add_argument("--sandbox", choices=["local", "docker"], default="local",
                         help="Sandbox environment (local or docker)")
+
+    parser.add_argument("--python_name", default="python", help="Name for python tool (default: python)")
+    parser.add_argument("--bash_name", default="bash", help="Name for bash tool (default: bash)")
 
     parser.add_argument("--config", help="JSON config file (overrides other args)")
 
@@ -191,7 +198,9 @@ def main():
         mode=args.mode,
         include_workspace=not args.no_workspace,
         display=args.display,
-        sandbox=args.sandbox
+        sandbox=args.sandbox,
+        python_name=args.python_name,
+        bash_name=args.bash_name
     )
 
 
