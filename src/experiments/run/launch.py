@@ -54,7 +54,8 @@ def run_paper_job(
     config_path: str,
     cluster_config: ClusterConfig,
     run_name: str,
-    needs_gpu: bool = False
+    needs_gpu: bool = False,
+    model: str = None
 ) -> dict:
     """Execute evaluation for a single paper in Singularity container.
 
@@ -95,6 +96,11 @@ def run_paper_job(
     # Get src directory (go up from run/ to experiments/ to src/)
     src_dir = Path(__file__).parent.parent.parent.absolute()
 
+    # Determine if we need to override tool names for o3/o4-mini
+    tool_name_args = ""
+    if model and model in ["openai/o3", "openai/o4-mini"]:
+        tool_name_args = "--python_name python_execute --bash_name bash_execute"
+
     bash_cmd = (
         f"export PYTHONUSERBASE=/tmp/.local && "
         f"export PYTHONPATH={overlay_path}/lib/python3.11/site-packages:/tmp/.local/lib/python3.11/site-packages:{src_dir}:{cluster_config.home_dir}/.local/lib/python3.11/site-packages:$PYTHONPATH && "
@@ -111,7 +117,8 @@ def run_paper_job(
         f"--paper_id {paper_id} "
         f"--config {config_path} "
         f"--log_dir {cluster_config.inspect_log_dir}/{run_name}/logs "
-        f"--workspace {paper_workspace}"
+        f"--workspace {paper_workspace} "
+        f"{tool_name_args}"
     )
 
     singularity_cmd.extend([
@@ -255,7 +262,8 @@ def main():
                     args.config,
                     cluster_config,
                     exp_config["RUN_NAME"],
-                    needs_gpu
+                    needs_gpu,
+                    exp_config.get("MODEL")
                 )
                 logger.info(f"Submitted job for {paper_id} (Partition={partition}, GPU={needs_gpu}, Memory={mem_gb}GB)")
                 logger.info(f"  Logs will be in: {paper_log_dir}/")
