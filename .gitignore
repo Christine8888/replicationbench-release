@@ -1,3 +1,4 @@
+!verify_overlay_setup.sh
 workspace/
 docker/
 .claude/
