@@ -24,6 +24,7 @@ From: python:3.11-slim
         astropy \
         scikit-learn \
         anthropic \
+        google-genai \
         openai \
         scikit-image \
         seaborn \
