@@ -66,21 +66,39 @@ def install_packages_in_overlay(
         _install_packages_individually(packages, overlay_dir, singularity_image)
         return
 
+    # First try with build isolation (default pip behavior)
     install_cmd = [
         "singularity", "exec",
         "--overlay", overlay_dir,
         "--bind", f"{overlay_dir}:{overlay_dir}:rw",
         singularity_image,
         "bash", "-lc",
-        f"PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
+        f"PYTHONUSERBASE={overlay_dir} python3 -m pip install --user {' '.join(packages)}"
     ]
 
     try:
         subprocess.run(install_cmd, check=True, capture_output=True, text=True)
-        logger.info("Successfully installed all packages")
+        logger.info("Successfully installed all packages with build isolation")
     except subprocess.CalledProcessError as e:
-        logger.warning(f"Batch install failed: {e.stderr}")
-        _install_packages_individually(packages, overlay_dir, singularity_image)
+        logger.warning(f"Batch install with build isolation failed: {e.stderr}")
+        logger.info("Retrying without build isolation...")
+
+        # Try again without build isolation
+        install_cmd_no_isolation = [
+            "singularity", "exec",
+            "--overlay", overlay_dir,
+            "--bind", f"{overlay_dir}:{overlay_dir}:rw",
+            singularity_image,
+            "bash", "-lc",
+            f"PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation {' '.join(packages)}"
+        ]
+
+        try:
+            subprocess.run(install_cmd_no_isolation, check=True, capture_output=True, text=True)
+            logger.info("Successfully installed all packages without build isolation")
+        except subprocess.CalledProcessError as e2:
+            logger.warning(f"Batch install without build isolation also failed: {e2.stderr}")
+            _install_packages_individually(packages, overlay_dir, singularity_image)
 
 
 def _install_packages_individually(
@@ -91,21 +109,39 @@ def _install_packages_individually(
     """Install packages one at a time."""
     failed_packages = []
     for pkg in packages:
+        # First try with build isolation
         install_cmd = [
             "singularity", "exec",
             "--overlay", overlay_dir,
             "--bind", f"{overlay_dir}:{overlay_dir}:rw",
             singularity_image,
             "bash", "-lc",
-            f'PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation "{pkg}"'
+            f'PYTHONUSERBASE={overlay_dir} python3 -m pip install --user "{pkg}"'
         ]
 
         try:
             subprocess.run(install_cmd, check=True, capture_output=True, text=True)
-            logger.info(f"Successfully installed {pkg}")
+            logger.info(f"Successfully installed {pkg} with build isolation")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Could not install {pkg}: {e.stderr}")
-            failed_packages.append(pkg)
+            logger.warning(f"Failed to install {pkg} with build isolation: {e.stderr}")
+            logger.info(f"Retrying {pkg} without build isolation...")
+
+            # Try again without build isolation
+            install_cmd_no_isolation = [
+                "singularity", "exec",
+                "--overlay", overlay_dir,
+                "--bind", f"{overlay_dir}:{overlay_dir}:rw",
+                singularity_image,
+                "bash", "-lc",
+                f'PYTHONUSERBASE={overlay_dir} python3 -m pip install --user --no-build-isolation "{pkg}"'
+            ]
+
+            try:
+                subprocess.run(install_cmd_no_isolation, check=True, capture_output=True, text=True)
+                logger.info(f"Successfully installed {pkg} without build isolation")
+            except subprocess.CalledProcessError as e2:
+                logger.error(f"Could not install {pkg}: {e2.stderr}")
+                failed_packages.append(pkg)
 
     if failed_packages:
         raise RuntimeError(f"Failed to install {len(failed_packages)} package(s): {', '.join(failed_packages)}")
