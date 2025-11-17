@@ -1,7 +1,7 @@
 #!/bin/bash
 # Verify overlay package installation and visibility
 
-PAPER_ID="trgb-std-candle"  # Change as needed
+PAPER_ID="hubble_trails"  # Change as needed
 WORKSPACE_BASE="/oak/stanford/projects/c4u/researchbench/workspace"
 SINGULARITY_IMAGE="/oak/stanford/projects/c4u/researchbench/workspace/inspect_final_tool.sif"
 OVERLAY_PATH="$WORKSPACE_BASE/$PAPER_ID/overlay"
@@ -36,10 +36,10 @@ print()
 print(\"Checking for overlay packages:\")
 try:
     # Try importing a package you know is in overlay
-    import numpy  # or whatever package you installed
-    print(f\"  numpy found at: {numpy.__file__}\")
+    import tensorflow  # or whatever package you installed
+    print(f\"  tensorflow found at: {tensorflow.__file__}\")
 except ImportError as e:
-    print(f\"  numpy not found: {e}\")
+    print(f\"  tensorflow not found: {e}\")
 '
     "
 echo ""
