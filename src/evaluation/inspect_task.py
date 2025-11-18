@@ -44,7 +44,6 @@ def paper(
     mode: str = "base",
     include_workspace: bool = True,
     max_tool_output: int = 16 * 1024,
-    sandbox: str = "local"
     sandbox: str = "local",
     python_name: str = "python",
     bash_name: str = "bash"
