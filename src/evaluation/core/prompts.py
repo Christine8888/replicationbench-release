@@ -3,7 +3,17 @@
 from typing import Optional
 
 
-SYSTEM_PROMPT = """You are an expert astrophysicist tasked with reproducing the key results of a scientific research paper. Your goal is to implement the necessary code to reproduce a specific numerical result from the paper. Your implementation should follow the instructions and methodology described in the paper as closely as possible. Your implementation should also be well-structured and documented. Do not reference stated results from the paper as they may not be correct. All results must be computed by the code you write. Work efficiently and complete your task in the allotted time.
+def get_system_prompt(python_tool_name: str = "execute_python", bash_tool_name: str = "execute_bash") -> str:
+    """Generate system prompt with dynamic tool names.
+
+    Args:
+        python_tool_name: Name of the Python execution tool
+        bash_tool_name: Name of the Bash execution tool
+
+    Returns:
+        System prompt with correct tool names
+    """
+    return f"""You are an expert astrophysicist tasked with reproducing the key results of a scientific research paper. Your goal is to implement the necessary code to reproduce a specific numerical result from the paper. Your implementation should follow the instructions and methodology described in the paper as closely as possible. Your implementation should also be well-structured and documented. Do not reference stated results from the paper as they may not be correct. All results must be computed by the code you write. Work efficiently and complete your task in the allotted time.
 
 CRITICAL RESTRICTIONS:
 0. First, make a note of the absolute path to your working directory with `pwd`. You may only work in this directory.
@@ -19,13 +29,13 @@ FAILURE HANDLING:
 If you fail to compute a result after multiple attempts, you MUST return None (or a list/array of Nones matching the expected output format). NEVER try to guess values, use phrases like "Let's provide reasonable values", or approximate values from the paper's figures/tables. Simply state that you failed and return None.
 
 IMPORTANT EXECUTION INSTRUCTIONS:
-1. DO NOT assume any variables or state from previous calls are preserved. EACH call to a Python tool or Bash command is independent and you must re-import all necessary packages and redefine all necessary variables. You should use good code organization and frequently save code and intermediate results to files. You may do this either via the Python tool or the execute_bash tool.
+1. DO NOT assume any variables or state from previous calls are preserved. EACH call to a Python tool or Bash command is independent and you must re-import all necessary packages and redefine all necessary variables. You should use good code organization and frequently save code and intermediate results to files. You may do this either via the Python tool or the {bash_tool_name} tool.
 
 You have ample computational resources and execution time. Do not assume you do not have the resources to compute the task. You should make a best effort at every task.
 
 2. CODE INTERPRETER STATE:
-   - The `execute_python` tool is only for running Python code directly, not executing Python files.
-   - Both the Python code interpreter (execute_python) and the Bash tool (execute_bash) are EPHEMERAL - all variables, imports, and state are cleared between each code execution
+   - The `{python_tool_name}` tool is only for running Python code directly, not executing Python files.
+   - Both the Python code interpreter ({python_tool_name}) and the Bash tool ({bash_tool_name}) are EPHEMERAL - all variables, imports, and state are cleared between each code execution
    - Python and bash commands have a timeout of 2 hours, and will be killed if they exceed this limit.
    - To avoid running out of work time due to unexpected errors, you should wrap *every* bash command with a timeout command. This will ensure that long-running commands are properly terminated, and help you in managing your time and execution resources.
    - For persistent code, you MUST write Python files (.py) and execute them
@@ -52,8 +62,8 @@ You have ample computational resources and execution time. Do not assume you do 
    If you encounter values that are physically impossible or orders of magnitude off from expected ranges, stop and investigate your approach.
 
 IMPORTANT TOOL USAGE INSTRUCTIONS:
-1. When using the 'execute_python' tool, you MUST include the 'code' parameter. DO NOT use the `timeout` parameter. This will cause errors.
-2. When using the 'execute_bash' tool, you MUST include the 'cmd' parameter
+1. When using the '{python_tool_name}' tool, you MUST include the 'code' parameter. DO NOT use the `timeout` parameter. This will cause errors.
+2. When using the '{bash_tool_name}' tool, you MUST include the 'cmd' parameter
 3. When using the 'str_replace_editor' tool with 'create' command, you MUST include:
   * 'command': "create"
   * 'path': "./filename.py"  # MUST use "./" to indicate the working directory
@@ -72,16 +82,25 @@ You will be provided with a paper manuscript, a set of tasks you must complete, 
 """
 
 
-END_PROMPT = """\n\nFINAL INSTRUCTIONS:
+def get_end_prompt(python_tool_name: str = "execute_python") -> str:
+    """Generate end prompt with dynamic tool names.
+
+    Args:
+        python_tool_name: Name of the Python execution tool
+
+    Returns:
+        End prompt with correct tool names
+    """
+    return f"""\n\nFINAL INSTRUCTIONS:
 ----------------------------------
 Follow the paper's methodology and the instructions precisely to reproduce the specified result. Remember to save results and code to permanent files, as your code execution environment is ephemeral. Comment your code clearly and make explicit note of all of your thoughts or decisions. Make sure to handle all data loading, processing, and computation steps necessary for the task. Do not give up until you have made a solid effort at reproducing the results! You must execute code using your given tools, not just produce a plan.
 
 Please remember the following important tips about tool usage:
-- The `execute_python` tool is ephemeral, so any variables or states will not be saved. You must save your work to files for persistence.
-- Do not use the `timeout` parameter with the `execute_python` tool
+- The `{python_tool_name}` tool is ephemeral, so any variables or states will not be saved. You must save your work to files for persistence.
+- Do not use the `timeout` parameter with the `{python_tool_name}` tool
 - Always use ABSOLUTE paths. Use pwd in your home (starting) directory to get your absolute path. This is where you should write files.
 Example (if pwd shows /tmp/tmp123456):
-{ "command": "create", "path": "/tmp/tmp123456/filename.py", "file_text": "# Your code here" }
+{{ "command": "create", "path": "/tmp/tmp123456/filename.py", "file_text": "# Your code here" }}
 
 Remember, this is a test of the paper's *reproducibility*. This means you should implement the paper's methodology from scratch on your own. Many tasks will involve significant challenges, computational complexity, code implementation, and trial and error. This is an extremely difficult task, but is extremely important for the future of scientific research.
 """
@@ -226,13 +245,21 @@ def get_task_instructions(task) -> str:
     return prompt
 
 
-def get_paper_prompt(paper, workspace: Optional[str] = None, include_workspace: bool = True) -> str:
+def get_paper_prompt(
+    paper,
+    workspace: Optional[str] = None,
+    include_workspace: bool = True,
+    python_tool_name: str = "execute_python",
+    bash_tool_name: str = "execute_bash"
+) -> str:
     """Generate complete prompt for a paper evaluation.
 
     Args:
         paper: Paper object with tasks and metadata
         workspace: Paper-specific workspace directory (e.g., /workspace/paper_id)
         include_workspace: Whether to alert agent that data is pre-downloaded
+        python_tool_name: Name of the Python execution tool
+        bash_tool_name: Name of the Bash execution tool
 
     Returns:
         Complete formatted prompt string
@@ -258,7 +285,7 @@ def get_paper_prompt(paper, workspace: Optional[str] = None, include_workspace: 
         prompt += f"\n\nTASK {i+1}:\n"
         prompt += get_task_instructions(task)
 
-    prompt += END_PROMPT
+    prompt += get_end_prompt(python_tool_name)
 
     if workspace and include_workspace:
         prompt += f"\n\nWORKSPACE DIRECTORY: {workspace}\n"
