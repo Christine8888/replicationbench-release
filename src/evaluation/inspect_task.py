@@ -9,7 +9,7 @@ from inspect_ai.tool import bash, python, think, tool_with, text_editor
 from inspect_ai.dataset import Sample
 from inspect_ai.solver import basic_agent, system_message
 from inspect_ai.agent import AgentPrompt
-from evaluation.core.prompts import SYSTEM_PROMPT, get_submission_instructions, get_paper_prompt
+from evaluation.core.prompts import get_system_prompt, get_submission_instructions, get_paper_prompt
 from evaluation.core.scorer import submission_file_scorer
 
 logger = logging.getLogger(__name__)
@@ -70,10 +70,13 @@ def paper(
     paper_prompt = get_paper_prompt(
         paper=paper_obj,
         workspace=workspace,
-        include_workspace=include_workspace
+        include_workspace=include_workspace,
+        python_tool_name=python_name,
+        bash_tool_name=bash_name
     )
 
-    system_prompt_with_submission = SYSTEM_PROMPT + "\n\n" + get_submission_instructions()
+    system_prompt = get_system_prompt(python_tool_name=python_name, bash_tool_name=bash_name)
+    system_prompt_with_submission = system_prompt + "\n\n" + get_submission_instructions()
 
     if mode == "react":
         solver = react_agent(
