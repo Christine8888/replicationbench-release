@@ -88,7 +88,7 @@ class Dataloader:
         return sorted(self.papers_dir.glob("*.json"))
 
     def _load_tasks(self, paper_id: str) -> Dict[str, Task]:
-        """Load all tasks for a paper."""
+        """Load all tasks for a paper, sorted by difficulty (easiest first)."""
         task_dir = self.tasks_dir / paper_id
 
         if not task_dir.exists():
@@ -106,7 +106,10 @@ class Dataloader:
 
             tasks[task.task_id] = task
 
-        return tasks
+        # Sort tasks by difficulty (easiest first)
+        sorted_tasks = dict(sorted(tasks.items(), key=lambda x: x[1].difficulty))
+
+        return sorted_tasks
 
     def filter_papers(self, **criteria) -> List[str]:
         """Filter papers by metadata.
