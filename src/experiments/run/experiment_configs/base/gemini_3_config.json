@@ -11,6 +11,5 @@
     "TIME_LIMIT": 21600,
     "ATTEMPTS": 1,
     "CACHE": true,
-    "INCLUDE_WORKSPACE": true,
-    "DISPLAY": "log"
+    "INCLUDE_WORKSPACE": true
 }
