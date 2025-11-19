@@ -212,8 +212,8 @@ def main():
             paper.execution_requirements and
             paper.execution_requirements.needs_gpu
         )
-        # Get paper-specific memory, defaulting to cluster config
-        mem_gb = MEMORY_CONFIG.get(paper_id, cluster_config.mem_gb)
+        # Get paper-specific memory, defaulting to 128GB for GPU jobs or cluster config for CPU
+        mem_gb = MEMORY_CONFIG.get(paper_id, 128 if needs_gpu else cluster_config.mem_gb)
         paper_groups[(needs_gpu, mem_gb)].append(paper_id)
 
     logger.info(f"Paper groupings by resource requirements:")
