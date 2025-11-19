@@ -51,6 +51,11 @@ def load_eval_logs_to_dataframe(
     """Load all eval logs from directories into a MultiIndex DataFrame.
 
     Returns DataFrame with MultiIndex (model, run, paper, task) and columns for metrics.
+
+    For each (model, run) combination:
+    - Loads exactly one eval per paper
+    - Warns if multiple evals found for same paper (takes most recent)
+    - Warns and fills with 0 if paper is missing
     """
     if dataloader is None:
         dataloader = Dataloader(
@@ -59,6 +64,7 @@ def load_eval_logs_to_dataframe(
         )
 
     all_data = []
+    expected_papers = set(dataloader.papers.keys())
 
     for log_dir in log_dirs:
         dir_name = os.path.basename(log_dir)
@@ -77,6 +83,8 @@ def load_eval_logs_to_dataframe(
             model = "Sonnet 4"
         elif "gemini-25" in dir_name or "gemini-2.5" in dir_name:
             model = "Gemini 2.5"
+        elif "gemini-3" in dir_name or "gemini-3.0" in dir_name:
+            model = "Gemini 3"
         elif "kimik2" in dir_name:
             model = "Kimi K2"
         else:
@@ -90,6 +98,8 @@ def load_eval_logs_to_dataframe(
         if not eval_files:
             eval_files = glob.glob(os.path.join(log_dir, "*.eval"))
 
+        # Group eval files by paper name
+        papers_found = {}
         for eval_file in eval_files:
             eval_log = read_eval_log_safe(eval_file)
             if not eval_log:
@@ -97,6 +107,24 @@ def load_eval_logs_to_dataframe(
 
             metadata = extract_metadata(eval_log)
             paper_name = metadata["paper_name"]
+
+            # Track multiple evals for same paper
+            if paper_name not in papers_found:
+                papers_found[paper_name] = []
+            papers_found[paper_name].append((eval_file, metadata))
+
+        # Process each paper - take only one eval per paper
+        for paper_name, eval_list in papers_found.items():
+            if len(eval_list) > 1:
+                # Multiple evals found - warn and take most recent
+                eval_files_with_mtime = [(f, m, os.path.getmtime(f)) for f, m in eval_list]
+                eval_files_with_mtime.sort(key=lambda x: x[2], reverse=True)  # Most recent first
+                eval_file, metadata, _ = eval_files_with_mtime[0]
+                warning_msg = f"⚠️  Multiple evals found for {model} run {run} paper {paper_name}: {len(eval_list)} files. Taking most recent: {os.path.basename(eval_file)}"
+                print(warning_msg)
+                logger.warning(warning_msg)
+            else:
+                eval_file, metadata = eval_list[0]
 
             weighted_score, regular_score = get_difficulty_weights(
                 dataloader, paper_name, metadata["task_results"]
@@ -147,6 +175,64 @@ def load_eval_logs_to_dataframe(
                         "tool_time_minutes": None,
                         "has_transcript": None,
                         "task_score": task_score,
+                        "task_difficulty": task.difficulty
+                    })
+
+        # Check for missing papers and fill with 0s
+        found_papers = set(papers_found.keys())
+        missing_papers = expected_papers - found_papers
+
+        if missing_papers:
+            warning_msg = f"⚠️  Missing papers for {model} run {run}: {sorted(missing_papers)}"
+            print(warning_msg)
+            logger.warning(warning_msg)
+
+        for paper_name in missing_papers:
+            # Add entry with 0 accuracy for missing paper
+            all_data.append({
+                "model": model,
+                "run": run,
+                "paper": paper_name,
+                "task": "_summary",
+                "accuracy": 0.0,
+                "difficulty_weighted_accuracy": 0.0,
+                "response_rate": 0.0,
+                "answered_tasks": 0,
+                "total_tasks": len(dataloader.papers[paper_name].tasks) if paper_name in dataloader.papers else 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "runtime_minutes": 0,
+                "llm_time_minutes": 0,
+                "tool_time_minutes": 0,
+                "has_transcript": False,
+                "task_score": None,
+                "task_difficulty": None
+            })
+
+            # Add task-level entries with 0 scores
+            if paper_name in dataloader.papers:
+                paper = dataloader.papers[paper_name]
+                for task_id, task in paper.tasks.items():
+                    task_id_clean = task_id.replace('.json', '')
+                    all_data.append({
+                        "model": model,
+                        "run": run,
+                        "paper": paper_name,
+                        "task": task_id_clean,
+                        "accuracy": None,
+                        "difficulty_weighted_accuracy": None,
+                        "response_rate": None,
+                        "answered_tasks": None,
+                        "total_tasks": None,
+                        "input_tokens": None,
+                        "output_tokens": None,
+                        "reasoning_tokens": None,
+                        "runtime_minutes": None,
+                        "llm_time_minutes": None,
+                        "tool_time_minutes": None,
+                        "has_transcript": None,
+                        "task_score": 0.0,
                         "task_difficulty": task.difficulty
                     })
 
