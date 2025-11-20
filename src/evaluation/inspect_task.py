@@ -46,7 +46,8 @@ def paper(
     max_tool_output: int = 16 * 1024,
     sandbox: str = "local",
     python_name: str = "python",
-    bash_name: str = "bash"
+    bash_name: str = "bash",
+    generate_kwargs: dict = None
 ):
     """Create Inspect task for a paper evaluation.
 
@@ -98,9 +99,12 @@ def paper(
     expected_output = paper_obj.get_output()
     output_tolerance = paper_obj.get_output_tolerance()
 
-    generate_config = GenerateConfig(
-        max_tool_output=max_tool_output
-    )
+    # Build GenerateConfig with defaults and optional overrides
+    config_params = {"max_tool_output": max_tool_output}
+    if generate_kwargs:
+        config_params.update(generate_kwargs)
+
+    generate_config = GenerateConfig(**config_params)
 
     return Task(
         dataset=[Sample(

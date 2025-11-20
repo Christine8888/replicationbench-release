@@ -32,7 +32,8 @@ def run_single_evaluation(
     display: str = "full",
     sandbox: str = "local",
     python_name: str = "python",
-    bash_name: str = "bash"
+    bash_name: str = "bash",
+    generate_kwargs: dict = None
 ) -> None:
     """Run evaluation for a single paper.
 
@@ -89,7 +90,8 @@ def run_single_evaluation(
         include_workspace=include_workspace,
         sandbox=sandbox,
         python_name=python_name,
-        bash_name=bash_name
+        bash_name=bash_name,
+        generate_kwargs=generate_kwargs
     )
 
     model_args = {}
@@ -168,6 +170,8 @@ def main():
         args.mode = "base"
     if args.display is None:
         args.display = "conversation" # for better readability
+    if not hasattr(args, 'generate_kwargs') or args.generate_kwargs is None:
+        args.generate_kwargs = None
 
     if hasattr(args, 'cache') and not args.no_cache:
         args.no_cache = not args.cache
@@ -200,7 +204,8 @@ def main():
         display=args.display,
         sandbox=args.sandbox,
         python_name=args.python_name,
-        bash_name=args.bash_name
+        bash_name=args.bash_name,
+        generate_kwargs=args.generate_kwargs
     )
 
 
