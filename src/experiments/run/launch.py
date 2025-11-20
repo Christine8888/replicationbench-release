@@ -251,6 +251,7 @@ def main():
                 "slurm_mem": f"{mem_gb}GB",
                 "slurm_job_name": f"{exp_config['RUN_NAME']}_{paper_id}",
                 "slurm_partition": partition,
+                "slurm_qos": "high_p",  
             }
 
             if cluster_config.n_parallel:
