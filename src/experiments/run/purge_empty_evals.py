@@ -5,6 +5,7 @@ and no actual evaluation results (samples, summaries, etc.).
 """
 
 import argparse
+import fnmatch
 import logging
 import zipfile
 from pathlib import Path
@@ -51,18 +52,50 @@ def is_empty_eval(eval_path: Path) -> bool:
         return True
 
 
-def purge_empty_evals(directories: list[str], dry_run: bool = True) -> tuple[int, int]:
+def should_exclude(file_path: Path, exclude_patterns: list[str]) -> bool:
+    """Check if a file should be excluded based on patterns.
+
+    Args:
+        file_path: Path to check
+        exclude_patterns: List of patterns to match against
+
+    Returns:
+        True if file should be excluded, False otherwise
+    """
+    if not exclude_patterns:
+        return False
+
+    # Check both the full path and just the filename
+    full_path_str = str(file_path)
+    filename = file_path.name
+
+    for pattern in exclude_patterns:
+        # Check if pattern matches the filename or full path
+        if fnmatch.fnmatch(filename, pattern) or fnmatch.fnmatch(full_path_str, pattern):
+            return True
+        # Also check if pattern is an exact match for filename
+        if filename == pattern:
+            return True
+
+    return False
+
+
+def purge_empty_evals(directories: list[str], dry_run: bool = True, exclude: list[str] = None) -> tuple[int, int]:
     """Purge empty .eval files from directories.
 
     Args:
         directories: List of directory paths to search
         dry_run: If True, only report what would be deleted
+        exclude: List of patterns to exclude from deletion
 
     Returns:
         Tuple of (empty_count, total_count)
     """
     empty_files = []
+    excluded_files = []
     total_files = 0
+
+    exclude = exclude or []
 
     for directory in directories:
         dir_path = Path(directory)
@@ -72,13 +105,26 @@ def purge_empty_evals(directories: list[str], dry_run: bool = True) -> tuple[int
 
         for eval_file in dir_path.rglob('*.eval'):
             total_files += 1
+
+            # Check if file should be excluded
+            if should_exclude(eval_file, exclude):
+                if is_empty_eval(eval_file):
+                    excluded_files.append(eval_file)
+                continue
+
             if is_empty_eval(eval_file):
                 empty_files.append(eval_file)
 
     logger.info(f"Found {len(empty_files)} empty .eval files out of {total_files} total")
 
+    if excluded_files:
+        logger.info(f"Excluded {len(excluded_files)} empty files from deletion due to --exclude patterns")
+        logger.info("\nExcluded empty files:")
+        for f in excluded_files:
+            logger.info(f"  {f} (excluded)")
+
     if empty_files:
-        logger.info("\nEmpty files:")
+        logger.info("\nEmpty files to be deleted:")
         for f in empty_files:
             logger.info(f"  {f}")
 
@@ -95,7 +141,22 @@ def purge_empty_evals(directories: list[str], dry_run: bool = True) -> tuple[int
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Purge empty .eval files from log directories"
+        description="Purge empty .eval files from log directories",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Dry run to see what would be deleted
+  python purge_empty_evals.py ../../../logs
+
+  # Exclude specific files
+  python purge_empty_evals.py ../../../logs --exclude important.eval backup_*.eval
+
+  # Exclude files matching a pattern
+  python purge_empty_evals.py ../../../logs --exclude "*backup*" --execute
+
+  # Exclude multiple patterns
+  python purge_empty_evals.py ../../../logs --exclude test_*.eval experiment_42.eval
+        """
     )
     parser.add_argument(
         "directories",
@@ -107,12 +168,19 @@ def main():
         action="store_true",
         help="Actually delete files (default is dry-run)"
     )
+    parser.add_argument(
+        "--exclude",
+        nargs="*",
+        default=[],
+        help="Patterns or filenames to exclude from deletion (supports wildcards like *.eval)"
+    )
 
     args = parser.parse_args()
 
     empty_count, total_count = purge_empty_evals(
         args.directories,
-        dry_run=not args.execute
+        dry_run=not args.execute,
+        exclude=args.exclude
     )
 
     logger.info(f"\nSummary: {empty_count} empty / {total_count} total .eval files")
