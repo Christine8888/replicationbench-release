@@ -1,0 +1,15 @@
+{
+    "MODEL": "openai/gpt-5-2025-08-07",
+    "RUN_NAME": "gpt-syw",
+    "TASK_TYPES": ["numeric"],
+    "FILTERS": {"source": "showyourwork"},
+    "MASKING": true,
+    "MODE": "base",
+    "MESSAGE_LIMIT": 100000,
+    "TOKEN_LIMIT": 5000000,
+    "EXECUTION_TIMEOUT": 7200,
+    "TIME_LIMIT": 21600,
+    "ATTEMPTS": 1,
+    "CACHE": true,
+    "INCLUDE_WORKSPACE": true
+}
