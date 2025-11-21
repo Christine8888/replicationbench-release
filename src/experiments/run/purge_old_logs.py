@@ -134,7 +134,6 @@ def purge_old_logs(
             dataloader = Dataloader(
                 task_types=["numeric"],
                 load_text=False,
-                filters={"source": "expert"}
             )
             logger.info(f"Found {len(dataloader.papers)} expected papers")
         except Exception as e:
