@@ -1,6 +1,6 @@
 {
     "MODEL": "openai/gpt-5-2025-08-07",
-    "RUN_NAME": "gpt-syw",
+    "RUN_NAME": "gpt5-syw",
     "TASK_TYPES": ["numeric"],
     "FILTERS": {"source": "showyourwork"},
     "MASKING": true,
