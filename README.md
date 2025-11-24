@@ -4,85 +4,30 @@ ReplicationBench evaluates whether AI agents can replicate real astrophysics res
 
 ![ReplicationBench Overview](./figure_1.png)
 
-## Setup
-You can install the dataset and its dependencies as follows:
+## Installation
 
 ```bash
 git clone https://github.com/Christine8888/replicationbench-release.git
 cd replicationbench-release
 
-# Basic installation -- for dataset loading only
+# Basic installation -- for dataset loading and prompt generation only
 uv pip install -e .
 
 # Install with dependencies for downloading datasets
 uv pip install -e ".[download]"
 
-# Install with dependencies for running evaluations
-uv pip install -e ".[eval]"
-
-# Install with all dependencies
+# Install with all dependencies (evaluations + datasets)
 uv pip install -e ".[all]"
 ```
 
-## Using the Dataset
-
-### Loading Papers and Tasks
-You can use the Dataloader to load papers with their associated tasks.
-```python
-from dataset.dataloader import Dataloader
-
-# Load all papers from the core ReplicationBench dataset (expert-written tasks)
-loader = Dataloader(filters={"source": "expert"})
-print(f"Loaded {len(loader.papers)} papers")
-for paper_id in loader.papers:
-    print(f"  - {paper_id}")
-```
-
-### Standard Evaluation Prompts
-You can generate standard evaluation prompts for a paper as follows:
-
-```python
-from evaluation.core.prompts import get_paper_prompt
-
-paper = loader.papers["gw_cosmo"]
-prompt = get_paper_prompt(
-    paper=paper,
-    workspace="/path/to/workspace/gw_cosmo",  # Optional: workspace path
-    include_workspace=True  # Tell agent about pre-downloaded data
-)
-```
-
-## Environment Setup
-
-You can set up the environment for a paper as follows:
-
-```python
-from dataset.dataloader import Dataloader
-from evaluation.setup import setup_paper_environment
-
-loader = Dataloader(paper_ids=["gw_cosmo"])
-paper = loader.papers["gw_cosmo"]
-
-workspace_dir = "/path/to/workspace/gw_cosmo"
-setup_paper_environment(
-    paper,
-    workspace_dir=workspace_dir,
-    download_data=True,
-    install_deps=True
-)
-```
-
-Note that this will install Python dependencies directly using `pip`, so this should be run *inside* the evaluation container.
-
 ## Running Evaluations
 
-### Using TerminalBench
+### Using Inspect AI
 
-ReplicationBench can be run through the TerminalBench framework. Datasets are available in [Harbor format](https://github.com/laude-institute/harbor-datasets/).
+We support running evaluations using [Inspect AI](https://inspect.aisi.org.uk). ReplicationBench can run in two modes:
 
-### Using Inspect
-
-We also support running evaluations using [Inspect AI](https://inspect.aisi.org.uk). In an image with dependencies and datasets installed, you can run evaluations as follows:
+#### 1. Local Sandbox (Simplest)
+Note that you should generally *not* run agents without sandboxing. However, the ReplicationBench paper's experiments were run on a shared computing resource without Docker support. We used an alternative containerization system (Singularity) and launched containers for every evaluation, while using local sandboxing.
 
 ```python
 from evaluation.run_single import run_single_evaluation
@@ -91,19 +36,111 @@ run_single_evaluation(
     paper_id="gw_cosmo",
     model="anthropic/claude-sonnet-4-5",
     log_dir="./logs/my_run",
-    workspace="./workspaces/gw_cosmo"
+    workspace="./workspace/gw_cosmo",
+    sandbox="local"
 )
 ```
 
+#### 2. Docker Sandbox (Recommended)
+If you have Docker installed, Inspect natively supports using Docker for sandboxed code execution. 
+
+```bash
+# 1. Install Docker (https://docs.docker.com/get-docker/)
+
+# 2. Build base image (contains common scientific packages)
+python -m src.evaluation.docker.build_images --base
+
+# 3. Build paper-specific image (will be built as replicationbench:{paper_id})
+python -m src.evaluation.docker.build_images --paper-id gw_cosmo
+
+# 4. Download datasets for paper to ./workspace/{paper_id}
+python -m src.evaluation.setup \
+    --paper-id gw_cosmo \
+    --workspace-base ./workspace \
+    --data-only
+
+# 5. Run evaluation from the paper's docker directory
+cd docker/gw_cosmo
+python -m evaluation.run_single \
+    --paper_id gw_cosmo \
+    --model anthropic/claude-sonnet-4-5 \
+    --log_dir ../../logs/my_run \
+    --workspace ../../workspace/gw_cosmo \
+    --sandbox docker \
+    --task_types numeric \
+    --message_limit 10000 \
+    --token_limit 5000000
+```
+
+If your agent framework requires specific packages (e.g., LangChain, orchestration libraries), add them to `src/evaluation/docker/Dockerfile.base` before building. Papers requiring GPU acceleration automatically have GPU device access configured in their `compose.yaml` file (requires nvidia-container-toolkit on the host). 
+
+### API Keys
+Set environment variables for your LLM provider before running evaluations:
+```bash
+export ANTHROPIC_API_KEY="your-anthropic-key"
+export OPENAI_API_KEY="your-openai-key"
+```
+
+See [Inspect AI documentation](https://inspect.aisi.org.uk/models.html) for more details on setting up model providers.
+
+## Dataset Details
+
+### Loading Papers and Tasks
+You can use the Dataloader to load papers with their associated tasks.
+```python
+from dataset.dataloader import Dataloader
+
+# load all expert-written tasks
+loader = Dataloader()
+print(f"Loaded {len(loader.papers)} papers")
+for paper_id in loader.papers:
+    print(f"  - {paper_id}")
+```
+
+### Standard Evaluation Prompts
+You can generate evaluation prompts matching the prompts used in the ReplicationBench paper as follows:
+
+```python
+from evaluation.core.prompts import get_paper_prompt
+
+paper = loader.papers["gw_cosmo"]
+prompt = get_paper_prompt(
+    paper=paper,
+    workspace="/path/to/workspace/gw_cosmo",  # Optional: workspace path
+    include_workspace=True  # Tell agent about pre-downloaded data in the workspace
+)
+```
+
+### Python Environment Setup
+Set up the Python environment for a paper programmatically:
+
+```python
+from dataset.dataloader import Dataloader
+from evaluation.setup import setup_paper_environment
+
+loader = Dataloader(paper_ids=["gw_cosmo"])
+paper = loader.papers["gw_cosmo"]
+
+workspace_dir = "./workspace/gw_cosmo"
+setup_paper_environment(
+    paper,
+    workspace_dir=workspace_dir,
+    download_data=True,  # Download datasets
+    install_deps=True    # Install Python dependencies
+)
+```
+
+**Note:** `install_deps=True` installs Python dependencies directly using `pip`, so this should be run inside an isolated environment (virtualenv, conda, or Docker container).
+
 ## Known Issues
-- Agents may occasionally guess answers currently due to random chance or general domain knowledge. We strongly suggest filtering and penalizing traces with "guessing" behavior
-- Neither this codebase nor TerminalBench provide safeguards preventing agents from accessing the answers via web browsing tools, such as by finding source code or reading the original paper manuscript. This does not appear in our evaluations but may affect the fidelity of future evaluations.
+- Agents may occasionally guess answers due to random chance or general domain knowledge. We strongly suggest filtering and penalizing traces with "guessing" behavior
+- Neither this codebase nor TerminalBench provide safeguards preventing agents from accessing the answers via web browsing tools, such as by finding source code or reading the original paper manuscript. This behavior does not appear in our experiments but could affect the fidelity of evaluations.
 
 ## Contributing
 
 We welcome contributions of new papers and tasks! If you are a researcher and have a candidate paper you would like to add to the dataset, please contact us with **[this form](https://docs.google.com/forms/d/e/1FAIpQLSe9JcvIFzBD_z1KhOsqNRDhcUBY6seGZRJyRfE_yE4TLPRu5A/viewform?usp=sharing&ouid=101310934872802722547)**. We will reach out with further instructions on how to adapt the paper for the dataset.
 
-We also accept direct PRs for tasks; see **[the PR instructions](PR_INSTRUCTIONS.md)** for detailed instructions on.
+We also accept direct PRs for tasks; see **[the PR instructions](PR_INSTRUCTIONS.md) for detailed instructions.
 
 ## Citation and License
 

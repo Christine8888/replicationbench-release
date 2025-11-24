@@ -28,7 +28,7 @@ class Dataloader:
         manuscripts_dir: Optional[str] = None,
         paper_ids: Optional[List[str]] = None,
         task_types: Optional[List[str]] = None,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Dict[str, Any] = {"source": "expert"},
         load_text: bool = True,
         masked: bool = True
     ):
@@ -40,7 +40,7 @@ class Dataloader:
             manuscripts_dir: Manuscripts directory (default: bundled data)
             paper_ids: Specific papers to load (None = all)
             task_types: Task types to load (None = all)
-            filters: Attribute filters to include (e.g., {"source": "showyourwork"})
+            filters: Attribute filters to include (e.g., {"source": "showyourwork"}). Default is to load all expert-written tasks.
             load_text: Whether to load text content
             masked: Load masked text vs unmasked text
         """
@@ -68,9 +68,8 @@ class Dataloader:
 
             paper = Paper.from_json(str(paper_file))
 
-            if self.filters:
-                if not all(getattr(paper, key, None) == value for key, value in self.filters.items()):
-                    continue
+            if not all(getattr(paper, key, None) == value for key, value in self.filters.items()):
+                continue
 
             paper.tasks = self._load_tasks(paper_id)
 

@@ -11,9 +11,6 @@ requires-python = ">=3.9"
 dependencies = []
 
 [project.optional-dependencies]
-eval = [
-    "inspect_ai>=0.3.0",
-]
 download = [
     "wget",
     "huggingface-hub",
