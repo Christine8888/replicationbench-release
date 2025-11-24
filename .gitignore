@@ -1,3 +1,4 @@
+*.eval
 baseline_results/
 workspace/
 docker/
