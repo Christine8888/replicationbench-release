@@ -25,7 +25,17 @@ uv pip install -e ".[all]"
 
 ### Using Inspect AI
 
-We support running evaluations using [Inspect AI](https://inspect.aisi.org.uk). ReplicationBench can run in two modes:
+We support running evaluations using [Inspect AI](https://inspect.aisi.org.uk). This release code only supports running evaluations on the core ReplicationBench dataset (not ReplicationBench-Plus). You can get a list of the paper IDs with the following code:
+
+```python
+from dataset.dataloader import Dataloader
+
+loader = Dataloader()
+for paper_id in loader.papers:
+    print(paper_id)
+```
+
+ReplicationBench can run in two modes:
 
 #### 1. Local Sandbox (Simplest)
 Note that you should generally *not* run agents without sandboxing. However, the ReplicationBench paper's experiments were run on a shared computing resource without Docker support. We used an alternative containerization system (Singularity) and launched containers for every evaluation, while using local sandboxing.
@@ -43,7 +53,7 @@ run_single_evaluation(
 ```
 
 #### 2. Docker Sandbox (Recommended)
-If you have Docker installed, Inspect natively supports using Docker for sandboxed code execution. 
+If you have Docker installed, Inspect natively supports using Docker for sandboxed code execution. Use the following steps to build corresponding Docker images (using `subprocess` to call Docker directly) and run evaluations for each paper.
 
 ```bash
 # 1. Install Docker (https://docs.docker.com/get-docker/)
@@ -90,7 +100,7 @@ You can use Inspect's built-in log viewer to view evaluation outputs:
 inspect view --log-dir /path/to/log/directory
 ```
 
-## Dataset Details
+## Python Interface to the Dataset
 
 ### Loading Papers and Tasks
 You can use the Dataloader to load papers with their associated tasks.
@@ -102,6 +112,14 @@ loader = Dataloader()
 print(f"Loaded {len(loader.papers)} papers")
 for paper_id in loader.papers:
     print(f"  - {paper_id}")
+
+# see example task
+task_id = list(loader.papers["gw_cosmo"].tasks.keys())[0]
+task = loader.papers["gw_cosmo"].tasks[task_id]
+print(task.description)
+print(task.instructions)
+print(task.expected_output)
+print(task.tolerance)
 ```
 
 ### Standard Evaluation Prompts

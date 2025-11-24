@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "researchbench"
+name = "replicationbench"
 version = "0.1.0"
-description = "ResearchBench: AI evaluation benchmark for scientific paper reproduction"
+description = "ReplicationBench: AI evaluation benchmark for scientific paper reproduction"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
