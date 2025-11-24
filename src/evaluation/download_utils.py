@@ -103,7 +103,9 @@ def _download_huggingface(dataset, workspace: str) -> None:
     os.makedirs(workspace, exist_ok=True)
 
     for hf_name, hf_split, hf_type in zip(dataset.hf_name, dataset.hf_split, dataset.hf_type):
-        save_path = os.path.join(workspace, f"{hf_name}_{hf_split}")
+        # Use just the dataset name (stem) without username prefix
+        hf_name_stem = hf_name.split('/')[-1]
+        save_path = os.path.join(workspace, f"{hf_name_stem}_{hf_split}")
 
         if hf_type == "snapshot":
             logger.info(f"Downloading snapshot {hf_name}")

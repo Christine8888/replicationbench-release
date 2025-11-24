@@ -21,6 +21,9 @@ all = [
     "wget",
     "huggingface-hub",
     "datasets",
+    "anthropic",
+    "openai",
+    "google-genai",
 ]
 
 [tool.hatch.build.targets.wheel]
