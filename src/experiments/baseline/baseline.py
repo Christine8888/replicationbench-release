@@ -15,9 +15,9 @@ from dataset.wrappers.paper import Paper
 from evaluation.core.prompts import get_paper_prompt, get_task_instructions
 from evaluation.core.scorer import parse_json_answer, check_json_equality
 from evaluation.core.utils import recursive_zero_out
-from logging_config import get_logger
+from logging_config import setup_logger
 
-logger = get_logger(__name__)
+logger = setup_logger(__name__)
 
 
 def create_paper_prompt(

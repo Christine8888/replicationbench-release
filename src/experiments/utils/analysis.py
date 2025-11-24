@@ -288,14 +288,26 @@ def get_model_summary_stats(df: pd.DataFrame) -> pd.DataFrame:
         best_accuracy = best_per_paper.mean()
         average_accuracy = avg_per_paper.mean()
 
-        # Bootstrap std over all paper-run combinations (3 runs × N papers samples)
-        all_samples = model_data['accuracy'].values
-        bootstrap_means = []
+        # Bootstrap: sample one run per paper to get distribution of means
+        # Pre-extract data for each paper (do this once, not 10k times)
         rng = np.random.RandomState(42)
         n_bootstrap = 10000
-        for _ in range(n_bootstrap):
-            sample = rng.choice(all_samples, size=len(all_samples), replace=True)
-            bootstrap_means.append(sample.mean())
+        papers = model_data.index.get_level_values('paper').unique()
+
+        # Extract accuracy values for each paper into a list of arrays
+        paper_accuracies = []
+        for paper in papers:
+            paper_runs = model_data.xs(paper, level='paper')['accuracy'].values
+            paper_accuracies.append(paper_runs)
+
+        # Fast bootstrap using pre-extracted data
+        bootstrap_means = np.zeros(n_bootstrap)
+        for i in range(n_bootstrap):
+            # For each paper, randomly select one run
+            bootstrap_sample = [rng.choice(runs) for runs in paper_accuracies]
+            bootstrap_means[i] = np.mean(bootstrap_sample)
+
+        bootstrap_accuracy = np.mean(bootstrap_means)
         std_accuracy = np.std(bootstrap_means)
 
         # Same for difficulty-weighted
@@ -305,6 +317,7 @@ def get_model_summary_stats(df: pd.DataFrame) -> pd.DataFrame:
         stats.append({
             "Model": model,
             "Avg Accuracy": average_accuracy,
+            "Bootstrap Accuracy": bootstrap_accuracy,
             "Std Accuracy": std_accuracy,
             "Best Accuracy": best_accuracy,
             "Avg Difficulty-Weighted": avg_dw_per_paper.mean(),
@@ -318,6 +331,35 @@ def get_model_summary_stats(df: pd.DataFrame) -> pd.DataFrame:
         })
 
     return pd.DataFrame(stats).set_index("Model")
+
+
+def get_global_coverage_stats(df: pd.DataFrame) -> dict:
+    """Get global statistics about task coverage across all models and runs.
+
+    Returns dict with:
+        - total_tasks: Total number of unique tasks
+        - solved_tasks: Number of tasks solved (score > 0) by at least one model/run
+        - solved_percentage: Percentage of tasks solved
+    """
+    task_df = df[df.index.get_level_values("task") != "_summary"].copy()
+
+    if task_df.empty:
+        return {"total_tasks": 0, "solved_tasks": 0, "solved_percentage": 0.0}
+
+    # Group by (paper, task) and check if any run had score > 0
+    task_solved = task_df.groupby(['paper', 'task'])['task_score'].apply(
+        lambda x: (x > 0).any()
+    )
+
+    total_tasks = len(task_solved)
+    solved_tasks = task_solved.sum()
+    solved_percentage = (solved_tasks / total_tasks * 100) if total_tasks > 0 else 0.0
+
+    return {
+        "total_tasks": total_tasks,
+        "solved_tasks": solved_tasks,
+        "solved_percentage": solved_percentage
+    }
 
 
 def get_per_paper_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -338,4 +380,11 @@ def get_per_paper_stats(df: pd.DataFrame) -> pd.DataFrame:
             "Num Evaluations": len(paper_data)
         })
 
-    return pd.DataFrame(stats).set_index("Paper")
+    df_result = pd.DataFrame(stats).set_index("Paper")
+
+    # Add average row across all papers
+    avg_row = df_result.mean(numeric_only=True)
+    avg_row.name = "AVERAGE"
+    df_result = pd.concat([df_result, avg_row.to_frame().T])
+
+    return df_result
