@@ -7,7 +7,8 @@ ReplicationBench evaluates whether AI agents can replicate real astrophysics res
 ## Installation
 
 ```bash
-git clone https://github.com/Christine8888/replicationbench-release.git
+# Clone just the release branch
+git clone --branch main --single-branch https://github.com/Christine8888/replicationbench-release.git
 cd replicationbench-release
 
 # Basic installation -- for dataset loading and prompt generation only
@@ -83,6 +84,12 @@ export OPENAI_API_KEY="your-openai-key"
 
 See [Inspect AI documentation](https://inspect.aisi.org.uk/models.html) for more details on setting up model providers.
 
+### Viewing Logs
+You can use Inspect's built-in log viewer to view evaluation outputs:
+```bash
+inspect view --log-dir /path/to/log/directory
+```
+
 ## Dataset Details
 
 ### Loading Papers and Tasks
@@ -140,7 +147,7 @@ setup_paper_environment(
 
 We welcome contributions of new papers and tasks! If you are a researcher and have a candidate paper you would like to add to the dataset, please contact us with **[this form](https://docs.google.com/forms/d/e/1FAIpQLSe9JcvIFzBD_z1KhOsqNRDhcUBY6seGZRJyRfE_yE4TLPRu5A/viewform?usp=sharing&ouid=101310934872802722547)**. We will reach out with further instructions on how to adapt the paper for the dataset.
 
-We also accept direct PRs for tasks; see **[the PR instructions](PR_INSTRUCTIONS.md) for detailed instructions.
+We also accept direct PRs for tasks; see [the PR instructions](PR_INSTRUCTIONS.md) for detailed instructions.
 
 ## Citation and License
 
@@ -160,4 +167,4 @@ If you use ReplicationBench in your work, please cite:
 
 ## License
 
-ReplicationBench is released under the MIT License. See [LICENSE](LICENSE) for details.
+ReplicationBench is released under the [MIT License](LICENSE).
