@@ -6,6 +6,8 @@ docker/
 slurm_logs/
 *.jsonl
 old_logs/
+test_logs/
+test_docker_setup.py
 *.sh
 *.DS_Store
 *.env

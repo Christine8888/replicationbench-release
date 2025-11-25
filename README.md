@@ -38,7 +38,7 @@ for paper_id in loader.papers:
 ReplicationBench can run in two modes:
 
 #### 1. Local Sandbox (Simplest)
-Note that you should generally *not* run agents without sandboxing. However, the ReplicationBench paper's experiments were run on a shared computing resource without Docker support. We used an alternative containerization system (Singularity) and launched containers for every evaluation, while using local sandboxing.
+Note that you should generally *not* run agents without some form of sandboxing. However, the ReplicationBench paper's experiments were run on a shared computing resource that did not have Docker support. We used an alternative containerization system (Singularity) and launched containers for every evaluation, but used Inspect's local sandboxing within the containers.
 
 ```python
 from evaluation.run_single import run_single_evaluation
@@ -78,12 +78,13 @@ python -m evaluation.run_single \
     --log_dir ../../logs/my_run \
     --workspace ../../workspace/gw_cosmo \
     --sandbox docker \
-    --task_types numeric \
-    --message_limit 10000 \
-    --token_limit 5000000
+    --message_limit 1000 \
+    --token_limit 5000000 \
+    --time_limit 21600 \ # timeout for entire evaluation
+    --execution_timeout 7200 # timeout for individual tool calls
 ```
 
-If your agent framework requires specific packages (e.g., LangChain, orchestration libraries), add them to `src/evaluation/docker/Dockerfile.base` before building. Papers requiring GPU acceleration automatically have GPU device access configured in their `compose.yaml` file (requires nvidia-container-toolkit on the host). 
+The base image includes common scientific packages, and paper-specific dependencies are automatically added from each paper's metadata. Papers requiring GPU acceleration automatically have GPU device access configured in their `compose.yaml` file (requires nvidia-container-toolkit on the host). Docker images can be built on any machine and will work on GPU machines as CUDA-enabled PyTorch is included in the base image. 
 
 ### API Keys
 Set environment variables for your LLM provider before running evaluations:
